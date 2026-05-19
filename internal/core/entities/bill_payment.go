@@ -1,8 +1,10 @@
 package entities
 
 import (
-    "time"
-    "github.com/google/uuid"
+	"time"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type BillDetail struct {
@@ -71,4 +73,12 @@ type ProviderLog struct {
     
     // Relationships
     Provider        Provider       `gorm:"foreignKey:ProviderID"`
+}
+
+// BeforeCreate hook for Provider
+func (p *Provider) BeforeCreate(tx *gorm.DB) error {
+    if p.ID == uuid.Nil {
+        p.ID = uuid.New()
+    }
+    return nil
 }

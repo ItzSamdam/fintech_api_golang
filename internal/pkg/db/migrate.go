@@ -14,7 +14,7 @@ func RunMigrations(db *gorm.DB) error {
     
     // Order matters for foreign keys
     // Child tables should come after parent tables
-    models := []interface{}{
+    models := []any{
         // Parent tables (no foreign keys)
         &entities.User{},
         &entities.Provider{},

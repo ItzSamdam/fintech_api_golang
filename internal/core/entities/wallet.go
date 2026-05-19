@@ -1,22 +1,29 @@
 package entities
 
 import (
-    "time"
-    "github.com/google/uuid"
+	"time"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type Wallet struct {
     ID              uuid.UUID      `gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
     UserID          uuid.UUID      `gorm:"type:uuid;uniqueIndex:idx_wallet_user;not null"`
-    Balance         int64          `gorm:"not null;default:0"`          // IN KOBO
-    LedgerBalance   int64          `gorm:"not null;default:0"`          // IN KOBO (for reconciliation)
+    // Balance         int64          `gorm:"not null;default:0"`          // IN KOBO
+    Balance AmountInKobo `gorm:"type:bigint;not null;default:0"`
+    // LedgerBalance   int64          `gorm:"not null;default:0"`          // IN KOBO (for reconciliation)
+    LedgerBalance AmountInKobo `gorm:"type:bigint;not null;default:0"`
     Currency        string         `gorm:"size:3;default:'NGN'"`
     IsLocked        bool           `gorm:"default:false"`
     LockedAt        *time.Time
     LockReason      string         `gorm:"size:255"`
-    DailySpent      int64          `gorm:"default:0"`                   // IN KOBO
-    WeeklySpent     int64          `gorm:"default:0"`                   // IN KOBO
-    MonthlySpent    int64          `gorm:"default:0"`                   // IN KOBO
+    // DailySpent      int64          `gorm:"default:0"`                   // IN KOBO
+    DailySpent AmountInKobo `gorm:"type:bigint;not null;default:0"`
+    // WeeklySpent     int64          `gorm:"default:0"`                   // IN KOBO
+    WeeklySpent AmountInKobo `gorm:"type:bigint;not null;default:0"`
+    // MonthlySpent    int64          `gorm:"default:0"`                   // IN KOBO
+    MonthlySpent AmountInKobo `gorm:"type:bigint;not null;default:0"`
     LastDailyReset  time.Time      `gorm:"not null;default:now()"`
     LastWeeklyReset time.Time      `gorm:"not null;default:now()"`
     LastMonthlyReset time.Time     `gorm:"not null;default:now()"`
@@ -36,12 +43,18 @@ type Transaction struct {
     Type            string         `gorm:"size:50;index:idx_txn_type;not null"`       // credit, debit
     Category        string         `gorm:"size:50;index:idx_txn_category;not null"`   // transfer, airtime, data, electricity, betting, savings
     SubCategory     string         `gorm:"size:50"`                                    // mtn, glo, ikeja_electric, bet9ja
-    Amount          int64          `gorm:"not null"`                                  // IN KOBO
-    Fee             int64          `gorm:"default:0"`                                 // IN KOBO
-    VAT             int64          `gorm:"default:0"`                                 // IN KOBO
-    TotalAmount     int64          `gorm:"not null"`                                  // Amount + Fee + VAT (IN KOBO)
-    BalanceBefore   int64          `gorm:"not null"`                                  // IN KOBO
-    BalanceAfter    int64          `gorm:"not null"`                                  // IN KOBO
+    // Amount          int64          `gorm:"not null"`                                  // IN KOBO
+    Amount AmountInKobo `gorm:"type:bigint;not null"`
+    // Fee             int64          `gorm:"default:0"`                                 // IN KOBO
+    Fee AmountInKobo `gorm:"type:bigint;default:0"`
+    // VAT             int64          `gorm:"default:0"`                                 // IN KOBO
+    VAT AmountInKobo `gorm:"type:bigint;default:0"`
+    // TotalAmount     int64          `gorm:"not null"`                                  // Amount + Fee + VAT (IN KOBO)
+    TotalAmount AmountInKobo `gorm:"type:bigint;not null"`
+    // BalanceBefore   int64          `gorm:"not null"`                                  // IN KOBO
+    BalanceBefore AmountInKobo `gorm:"type:bigint;not null"`
+    // BalanceAfter    int64          `gorm:"not null"`                                  // IN KOBO
+    BalanceAfter AmountInKobo `gorm:"type:bigint;not null"`
     Status          string         `gorm:"size:20;index:idx_txn_status;default:'pending'"` // pending, success, failed, reversed
     Description     string         `gorm:"size:255"`
     Metadata        string         `gorm:"type:jsonb"`                                 // JSON metadata
@@ -77,4 +90,48 @@ type TransferDetail struct {
     
     // Relationships
     Transaction     Transaction    `gorm:"foreignKey:TransactionID"`
+}
+
+// AfterFind GORM hook - called after loading from database
+func (t *Transaction) AfterFind(tx *gorm.DB) error {
+    // Example: You can add post-load transformations here
+    // For instance, you might want to populate a cache or log access
+    
+    // If you need to convert amounts to a different format for API response,
+    // do it in the DTO layer, not here
+    
+    return nil
+}
+
+// BeforeCreate GORM hook for Transaction
+func (t *Transaction) BeforeCreate(tx *gorm.DB) error {
+    if t.ID == uuid.Nil {
+        t.ID = uuid.New()
+    }
+    
+    // Generate reference if not set
+    if t.Reference == "" {
+        t.Reference = generateTransactionReference()
+    }
+    
+    return nil
+}
+
+// Helper function to generate transaction reference
+func generateTransactionReference() string {
+    return "TXN" + time.Now().Format("20060102150405") + uuid.New().String()[:8]
+}
+
+// BeforeCreate hook for Wallet
+func (w *Wallet) BeforeCreate(tx *gorm.DB) error {
+    if w.ID == uuid.Nil {
+        w.ID = uuid.New()
+    }
+    return nil
+}
+
+// BeforeUpdate hook for Wallet - update timestamps
+func (w *Wallet) BeforeUpdate(tx *gorm.DB) error {
+    w.UpdatedAt = time.Now()
+    return nil
 }

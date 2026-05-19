@@ -73,6 +73,7 @@ func InitGORM(cfg *config.DatabaseConfig) (*gorm.DB, error) {
     return db, nil
 }
 
+
 // CloseDB closes the database connection
 func CloseDB(db *gorm.DB) error {
     sqlDB, err := db.DB()

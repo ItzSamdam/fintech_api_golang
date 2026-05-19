@@ -123,3 +123,11 @@ type OTP struct {
     ExpiresAt       time.Time      `gorm:"not null"`
     CreatedAt       time.Time      `gorm:"not null;default:now()"`
 }
+
+// BeforeCreate GORM hook - generates UUID if not set
+func (u *User) BeforeCreate(tx *gorm.DB) error {
+    if u.ID == uuid.Nil {
+        u.ID = uuid.New()
+    }
+    return nil
+}
