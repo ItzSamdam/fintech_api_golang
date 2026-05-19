@@ -2,9 +2,9 @@ package main
 
 import (
     "log"
-    "fintech-api/internal/config"
-    "fintech-api/internal/pkg/db"
-    "fintech-api/api/routes"
+    "fintech_api_golang/internal/config"
+    "fintech_api_golang/internal/pkg/db"
+    "fintech_api_golang/api/routes"
     "github.com/gofiber/fiber/v2"
 )
 
