@@ -1,6 +1,11 @@
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     phone_number VARCHAR(15) NOT NULL UNIQUE,
+    first_name VARCHAR(255),
+    last_name VARCHAR(255),
+    middle_name VARCHAR(255),
+    date_of_birth DATE,
+    gender VARCHAR(10),
     email VARCHAR(255) UNIQUE,
     bvn VARCHAR(11),
     nin VARCHAR(11),
