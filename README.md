@@ -1,5 +1,5 @@
 # Fintech API (Golang)
-
+# PS: This is only a challenge building a fintech api coming from a nodejs/laravel background. pron to errors. so please check well before using as a template for production apps
 A modular, hexagonal-architecture based fintech API built with Go.  
 This project provides wallet services, transfers, bill payments, savings goals, compliance checks, and admin features.
 
