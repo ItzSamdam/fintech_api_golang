@@ -74,3 +74,61 @@ fintech_api_golang/
 ├── go.sum
 ├── Makefile                # Build/test commands
 └── README.md
+```
+
+## 🚀 Features
+
+- Authentication & Authorization: JWT-based auth, role-based access.
+- Wallet Management: Create, fund, transfer between wallets.
+- Transfers: Bank transfers via NIP, name enquiry.
+- Bill Payments: Airtime, data, electricity, betting.
+- Savings Goals: Create and contribute to savings goals.
+- Notifications: Push/email notifications.
+- Compliance: KYC, tier limits, audit logging.
+- Admin Panel: Manage users, wallets, transactions, providers, fees, roles.
+- Middleware: Logging, recovery, CORS, request ID, rate limiting.
+
+## 🛠️ Tech Stack
+- Language: Go
+- Database: PostgreSQL, Redis
+- Queue: RabbitMQ
+- Logging: Zap
+- Architecture: Hexagonal (ports & adapters)
+- Deployment: Docker, Kubernetes, Terraform
+- Docs: Swagger, Postman
+
+## 📦 Setup
+Clone the repository:
+
+```bash
+git clone https://github.com/ItzSamdam/fintech_api_golang.git
+cd fintech_api_golang
+```
+Install dependencies:
+```bash
+go mod tidy
+```
+Configure environment variables:
+```bash
+cp .env.example .env
+```
+Run migrations:
+```bash
+./scripts/migrate-up.sh
+```
+Start the API:
+```bash
+go run cmd/api/main.go
+```
+## 🧪 Testing
+- Unit tests: go test ./tests/unit/...
+- Integration tests: go test ./tests/integration/...
+- Contract tests: go test ./tests/contract/...
+- End-to-end tests: go test ./tests/e2e/...
+
+## 📖 Documentation
+- Swagger: api/docs/swagger.yaml
+- Postman collection: api/docs/postman_collection.json
+
+## 📜 License
+This project is licensed under the MIT License.
