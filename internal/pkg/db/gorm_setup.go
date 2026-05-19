@@ -2,76 +2,144 @@ package db
 
 import (
     "fmt"
+    "log"
     "time"
-    "fintech_api_golang/internal/core/entities"
+    
+    "fintech_api_golang/internal/config"
+    
     "gorm.io/driver/postgres"
     "gorm.io/gorm"
     "gorm.io/gorm/logger"
 )
 
+// InitGORM initializes the GORM database connection
 func InitGORM(cfg *config.DatabaseConfig) (*gorm.DB, error) {
+    // Build DSN string
     dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=%s TimeZone=Africa/Lagos",
-        cfg.Host, cfg.User, cfg.Password, cfg.DBName, cfg.Port, cfg.SSLMode)
+        cfg.Host,
+        cfg.User,
+        cfg.Password,
+        cfg.DBName,
+        cfg.Port,
+        cfg.SSLMode,
+    )
     
+    // Configure GORM logger
+    gormLogger := logger.Default.LogMode(logger.Info)
+    if cfg.SSLMode == "disable" {
+        // In development, log all queries
+        gormLogger = logger.Default.LogMode(logger.Info)
+    } else {
+        // In production, only log errors
+        gormLogger = logger.Default.LogMode(logger.Error)
+    }
+    
+    // Open connection
     db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-        Logger: logger.Default.LogMode(logger.Info),
+        Logger:                 gormLogger,
+        SkipDefaultTransaction: true, // For better performance
+        PrepareStmt:            true, // For prepared statements
         NowFunc: func() time.Time {
             return time.Now().UTC()
         },
     })
     
     if err != nil {
-        return nil, err
+        return nil, fmt.Errorf("failed to connect to database: %w", err)
     }
     
-    // Auto migrate (in development)
-    err = db.AutoMigrate(
-        &entities.User{},
-        &entities.KYC{},
-        &entities.Session{},
-        &entities.TrustedDevice{},
-        &entities.TwoFA{},
-        &entities.OTP{},
-        &entities.Wallet{},
-        &entities.Transaction{},
-        &entities.TransferDetail{},
-        &entities.BillDetail{},
-        &entities.Provider{},
-        &entities.ProviderLog{},
-        &entities.SavingsGoal{},
-        &entities.SavingsContribution{},
-        &entities.AutoRoundup{},
-        &entities.FeeConfig{},
-        &entities.TierLimit{},
-        &entities.AdminUser{},
-        &entities.Role{},
-        &entities.AuditLog{},
-        &entities.SupportTicket{},
-        &entities.TicketMessage{},
-    )
-    
-    return db, err
-}
-
-// GORM Hooks for auto-converting NGN to Kobo
-type AmountInKobo int64
-
-func (a *AmountInKobo) Scan(value interface{}) error {
-    // Convert from DB (int64) to struct
-    *a = AmountInKobo(value.(int64))
-    return nil
-}
-
-// BeforeCreate hook for generating UUID if not set
-func (u *User) BeforeCreate(tx *gorm.DB) error {
-    if u.ID == uuid.Nil {
-        u.ID = uuid.New()
+    // Get underlying sql.DB
+    sqlDB, err := db.DB()
+    if err != nil {
+        return nil, fmt.Errorf("failed to get underlying sql.DB: %w", err)
     }
-    return nil
+    
+    // Configure connection pool
+    sqlDB.SetMaxOpenConns(cfg.MaxOpenConns)
+    sqlDB.SetMaxIdleConns(cfg.MaxIdleConns)
+    sqlDB.SetConnMaxLifetime(cfg.ConnMaxLifetime)
+    
+    // Test connection
+    if err := sqlDB.Ping(); err != nil {
+        return nil, fmt.Errorf("failed to ping database: %w", err)
+    }
+    
+    log.Println("✓ Database connection established")
+    log.Printf("  Host: %s:%d", cfg.Host, cfg.Port)
+    log.Printf("  Database: %s", cfg.DBName)
+    log.Printf("  Max Open Conns: %d", cfg.MaxOpenConns)
+    log.Printf("  Max Idle Conns: %d", cfg.MaxIdleConns)
+    
+    return db, nil
 }
 
-// AfterFind hook for formatting (if needed)
-func (t *Transaction) AfterFind(tx *gorm.DB) error {
-    // Any post-load transformations
-    return nil
+// CloseDB closes the database connection
+func CloseDB(db *gorm.DB) error {
+    sqlDB, err := db.DB()
+    if err != nil {
+        return err
+    }
+    return sqlDB.Close()
+}
+
+// TransactionWithRetry executes a transaction with retry logic
+func TransactionWithRetry(db *gorm.DB, retries int, txFunc func(*gorm.DB) error) error {
+    var err error
+    
+    for i := 0; i < retries; i++ {
+        err = db.Transaction(txFunc)
+        if err == nil {
+            return nil
+        }
+        
+        // Check if retryable error
+        if isRetryableError(err) && i < retries-1 {
+            log.Printf("Transaction failed, retrying (%d/%d): %v", i+1, retries, err)
+            time.Sleep(time.Duration(i+1) * 100 * time.Millisecond) // Backoff
+            continue
+        }
+        break
+    }
+    
+    return err
+}
+
+// isRetryableError checks if the error is retryable
+func isRetryableError(err error) bool {
+    if err == nil {
+        return false
+    }
+    
+    // Check for common retryable errors
+    errMsg := err.Error()
+    retryablePatterns := []string{
+        "deadlock detected",
+        "lock timeout",
+        "connection reset",
+        "connection refused",
+        "too many connections",
+    }
+    
+    for _, pattern := range retryablePatterns {
+        if contains(errMsg, pattern) {
+            return true
+        }
+    }
+    
+    return false
+}
+
+// contains checks if a string contains a substring
+func contains(s, substr string) bool {
+    return len(s) >= len(substr) && (s == substr || len(substr) == 0 || 
+        (len(s) > len(substr) && findSubstring(s, substr)))
+}
+
+func findSubstring(s, substr string) bool {
+    for i := 0; i <= len(s)-len(substr); i++ {
+        if s[i:i+len(substr)] == substr {
+            return true
+        }
+    }
+    return false
 }

@@ -33,11 +33,11 @@ type User struct {
     DeletedAt       gorm.DeletedAt `gorm:"index"`
     
     // Relationships
-    Wallets         []Wallet       `gorm:"foreignKey:UserID"`
-    KYC             KYC            `gorm:"foreignKey:UserID"`
-    Sessions        []Session      `gorm:"foreignKey:UserID"`
-    Devices         []TrustedDevice `gorm:"foreignKey:UserID"`
-    TwoFAs          []TwoFA        `gorm:"foreignKey:UserID"`
+    // Wallets         []Wallet       `gorm:"foreignKey:UserID"`
+    // KYC             KYC            `gorm:"foreignKey:UserID"`
+    // Sessions        []Session      `gorm:"foreignKey:UserID"`
+    // Devices         []TrustedDevice `gorm:"foreignKey:UserID"`
+    // TwoFAs          []TwoFA        `gorm:"foreignKey:UserID"`
 }
 
 type KYC struct {
