@@ -2,6 +2,7 @@ package handlers
 
 import (
     "github.com/gofiber/fiber/v2"
+    "github.com/google/uuid"
     
     "fintech_api_golang/internal/core/services"
     "fintech_api_golang/internal/dto/request"
@@ -180,6 +181,52 @@ func (h *TransferHandler) GetTransferHistory(c *fiber.Ctx) error {
     
     return c.Status(fiber.StatusOK).JSON(response.SuccessResponse{
         Success: true,
+        Data:    resp,
+    })
+}
+
+// SendToWallet - POST /transfers/send-to-wallet
+func (h *TransferHandler) SendToWallet(c *fiber.Ctx) error {
+    userID, err := middleware.GetUserIDFromContext(c)
+    if err != nil {
+        return c.Status(fiber.StatusUnauthorized).JSON(response.ErrorResponse{
+            Error:   "Unauthorized",
+            Message: "User not authenticated",
+        })
+    }
+    
+    var req struct {
+        RecipientWalletID string `json:"recipient_wallet_id" validate:"required"`
+        Amount            int64  `json:"amount" validate:"required,min=100"`
+        Narration         string `json:"narration"`
+    }
+    
+    if err := c.BodyParser(&req); err != nil {
+        return c.Status(fiber.StatusBadRequest).JSON(response.ErrorResponse{
+            Error:   "Validation Error",
+            Message: "Invalid request body",
+        })
+    }
+    
+    recipientID, err := uuid.Parse(req.RecipientWalletID)
+    if err != nil {
+        return c.Status(fiber.StatusBadRequest).JSON(response.ErrorResponse{
+            Error:   "Validation Error",
+            Message: "Invalid recipient wallet ID",
+        })
+    }
+    
+    resp, err := h.transferService.SendToWallet(c.Context(), userID, recipientID, req.Amount, req.Narration)
+    if err != nil {
+        return c.Status(fiber.StatusBadRequest).JSON(response.ErrorResponse{
+            Error:   "Transfer Failed",
+            Message: err.Error(),
+        })
+    }
+    
+    return c.Status(fiber.StatusOK).JSON(response.SuccessResponse{
+        Success: true,
+        Message: "Transfer completed successfully",
         Data:    resp,
     })
 }

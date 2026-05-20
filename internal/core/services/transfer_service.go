@@ -47,6 +47,7 @@ func NewTransferService(
     }
 }
 
+// SendTransfer - Handles both in-app and external transfers
 func (s *TransferService) SendTransfer(ctx context.Context, userID uuid.UUID, req *request.SendTransferRequest) (*response.TransactionResponse, error) {
     // Get user's wallet
     wallet, err := s.walletRepo.GetByUserIDForUpdate(ctx, userID)
@@ -62,27 +63,59 @@ func (s *TransferService) SendTransfer(ctx context.Context, userID uuid.UUID, re
         return nil, errors.New("wallet is locked")
     }
     
+    var recipientName string
+    var recipientWallet *entities.Wallet
+    
+    // Handle different recipient types
+    if req.RecipientType == "bank" {
+        // External transfer - verify bank account first
+        nameEnquiry, err := s.NameEnquiry(ctx, &request.NameEnquiryRequest{
+            AccountNumber: req.RecipientID,
+            BankCode:      req.RecipientBankCode,
+        })
+        if err != nil {
+            return nil, errors.New("account verification failed: " + err.Error())
+        }
+        recipientName = nameEnquiry.AccountName
+    } else if req.RecipientType == "wallet" {
+        // In-app transfer - verify recipient wallet exists
+        recipientWallet, err = s.walletRepo.GetByUserID(ctx, uuid.MustParse(req.RecipientID))
+        if err != nil || recipientWallet == nil {
+            return nil, errors.New("recipient wallet not found")
+        }
+        
+        // Get recipient user for name
+        recipientUser, err := s.userRepo.GetByID(ctx, recipientWallet.UserID)
+        if err == nil && recipientUser != nil {
+            recipientName = recipientUser.PhoneNumber
+        }
+        
+        // Prevent self-transfer
+        if recipientWallet.UserID == userID {
+            return nil, errors.New("cannot transfer to yourself")
+        }
+    }
+    
     // Check sufficient balance
-    if wallet.Balance < entities.AmountInKobo(req.Amount) {
+    if int64(wallet.Balance) < req.Amount {
         return nil, errors.New("insufficient balance")
     }
     
     // Calculate fee
     fee := s.calculateTransferFee(req.Amount)
-    vat := int64(float64(fee) * 0.075) // 7.5% VAT
+    vat := int64(float64(fee) * 0.075)
     totalAmount := req.Amount + fee + vat
     
-    if wallet.Balance < entities.AmountInKobo(totalAmount) {
+    if int64(wallet.Balance) < totalAmount {
         return nil, errors.New("insufficient balance including fees")
     }
     
-    // Generate reference
     reference := s.generateReference("TRF")
     
-    // Start transaction
     var transaction *entities.Transaction
+    
     err = s.db.Transaction(func(tx *gorm.DB) error {
-        // Debit wallet
+        // Debit sender's wallet
         if err := s.walletRepo.Debit(ctx, wallet.ID, totalAmount, reference); err != nil {
             return err
         }
@@ -90,6 +123,13 @@ func (s *TransferService) SendTransfer(ctx context.Context, userID uuid.UUID, re
         // Update spent limits
         if err := s.walletRepo.UpdateSpentLimits(ctx, wallet.ID, req.Amount); err != nil {
             return err
+        }
+        
+        // For in-app transfer, credit recipient immediately
+        if req.RecipientType == "wallet" && recipientWallet != nil {
+            if err := s.walletRepo.Credit(ctx, recipientWallet.ID, req.Amount, reference); err != nil {
+                return err
+            }
         }
         
         // Create transaction record
@@ -105,10 +145,9 @@ func (s *TransferService) SendTransfer(ctx context.Context, userID uuid.UUID, re
             VAT:           entities.AmountInKobo(vat),
             TotalAmount:   entities.AmountInKobo(totalAmount),
             BalanceBefore: wallet.Balance,
-            BalanceAfter:  entities.AmountInKobo(wallet.Balance) - entities.AmountInKobo(totalAmount),
+            BalanceAfter:  entities.AmountInKobo(int64(wallet.Balance) - totalAmount),
             Status:        "processing",
             Description:   req.Narration,
-            IPAddress:     "", // Get from context
             CreatedAt:     time.Now(),
         }
         
@@ -122,7 +161,7 @@ func (s *TransferService) SendTransfer(ctx context.Context, userID uuid.UUID, re
             TransactionID: transaction.ID,
             RecipientType: req.RecipientType,
             RecipientID:   req.RecipientID,
-            RecipientName: req.RecipientName,
+            RecipientName: recipientName,
             Narration:     req.Narration,
         }
         
@@ -134,6 +173,14 @@ func (s *TransferService) SendTransfer(ctx context.Context, userID uuid.UUID, re
             return err
         }
         
+        // If in-app transfer, mark as success immediately
+        if req.RecipientType == "wallet" {
+            now := time.Now()
+            transaction.Status = "success"
+            transaction.CompletedAt = &now
+            return s.transactionRepo.Update(ctx, transaction)
+        }
+        
         return nil
     })
     
@@ -141,34 +188,127 @@ func (s *TransferService) SendTransfer(ctx context.Context, userID uuid.UUID, re
         return nil, err
     }
     
-    // Process external transfer (async or sync)
-    go s.processExternalTransfer(context.Background(), transaction, req)
+    // Only process external transfer via provider
+    if req.RecipientType == "bank" {
+        go s.processExternalTransfer(context.Background(), transaction, req)
+    } else {
+        // For in-app, return success immediately
+        return s.mapTransactionToResponse(transaction), nil
+    }
     
     return s.mapTransactionToResponse(transaction), nil
 }
 
-func (s *TransferService) processExternalTransfer(ctx context.Context, transaction *entities.Transaction, req *request.SendTransferRequest) {
-    // Call RedBiller API
-    var resp *providers.RedBillerResponse
-    var err error
-    
-    if req.RecipientType == "bank" {
-        resp, err = s.redBiller.SendMoney(ctx, &providers.SendMoneyRequest{
-            AccountNo:   req.RecipientID,
-            BankCode:    req.RecipientBankCode,
-            Amount:      req.Amount,
-            Narration:   req.Narration,
-            CallbackURL: s.config.Webhook.CallbackURL,
-            Reference:   transaction.Reference,
-        })
-    } else {
-        // Handle wallet-to-wallet transfer
-        // This would be internal
-        resp = &providers.RedBillerResponse{Success: true}
+// SendToWallet - Direct wallet to wallet transfer
+func (s *TransferService) SendToWallet(ctx context.Context, userID uuid.UUID, recipientWalletID uuid.UUID, amount int64, narration string) (*response.TransactionResponse, error) {
+    // Get sender's wallet
+    senderWallet, err := s.walletRepo.GetByUserIDForUpdate(ctx, userID)
+    if err != nil {
+        return nil, err
     }
     
+    if senderWallet == nil {
+        return nil, errors.New("wallet not found")
+    }
+    
+    // Get recipient's wallet
+    recipientWallet, err := s.walletRepo.GetByID(ctx, recipientWalletID)
+    if err != nil || recipientWallet == nil {
+        return nil, errors.New("recipient wallet not found")
+    }
+    
+    // Check sufficient balance
+    if int64(senderWallet.Balance) < amount {
+        return nil, errors.New("insufficient balance")
+    }
+    
+    reference := s.generateReference("WTR")
+    
+    var transaction *entities.Transaction
+    
+    err = s.db.Transaction(func(tx *gorm.DB) error {
+        // Debit sender
+        if err := s.walletRepo.Debit(ctx, senderWallet.ID, amount, reference); err != nil {
+            return err
+        }
+        
+        // Credit recipient
+        if err := s.walletRepo.Credit(ctx, recipientWallet.ID, amount, reference); err != nil {
+            return err
+        }
+        
+        // Create sender transaction
+        transaction = &entities.Transaction{
+            ID:            uuid.New(),
+            Reference:     reference,
+            WalletID:      senderWallet.ID,
+            UserID:        userID,
+            Type:          "debit",
+            Category:      "transfer",
+            Amount:        entities.AmountInKobo(amount),
+            Fee:           0,
+            VAT:           0,
+            TotalAmount:   entities.AmountInKobo(amount),
+            BalanceBefore: senderWallet.Balance,
+            BalanceAfter:  entities.AmountInKobo(int64(senderWallet.Balance) - amount),
+            Status:        "success",
+            Description:   narration,
+            CompletedAt:   timeNow(),
+            CreatedAt:     time.Now(),
+        }
+        
+        if err := s.transactionRepo.Create(ctx, transaction); err != nil {
+            return err
+        }
+        
+        // Create transfer detail
+        transferDetail := &entities.TransferDetail{
+            ID:            uuid.New(),
+            TransactionID: transaction.ID,
+            RecipientType: "wallet",
+            RecipientID:   recipientWallet.UserID.String(),
+            Narration:     narration,
+        }
+        
+        return s.transferDetailRepo.Create(ctx, transferDetail)
+    })
+    
+    if err != nil {
+        return nil, err
+    }
+    
+    return s.mapTransactionToResponse(transaction), nil
+}
+
+
+// processExternalTransfer - Only called for bank transfers
+func (s *TransferService) processExternalTransfer(ctx context.Context, transaction *entities.Transaction, req *request.SendTransferRequest) {
+    // Verify account details again before sending (fresh validation)
+    nameEnquiry, err := s.NameEnquiry(ctx, &request.NameEnquiryRequest{
+        AccountNumber: req.RecipientID,
+        BankCode:      req.RecipientBankCode,
+    })
+    
+    if err != nil || nameEnquiry.AccountName == "" {
+        errorMsg := "account verification failed before transfer"
+        if err != nil {
+            errorMsg = err.Error()
+        }
+        s.transactionRepo.MarkAsFailed(ctx, transaction.Reference, errorMsg)
+        return
+    }
+    
+    // Call RedBiller API to send money
+    resp, err := s.redBiller.SendMoney(ctx, &providers.SendMoneyRequest{
+        AccountNo:   req.RecipientID,
+        BankCode:    req.RecipientBankCode,
+        Amount:      req.Amount,
+        Narration:   req.Narration,
+        CallbackURL: "https://domain.com/api/callback", //s.config.Webhook.CallbackURL,
+        Reference:   transaction.Reference,
+    })
+    
     if err != nil || (resp != nil && !resp.Success) {
-        // Mark transaction as failed
         errorMsg := "transfer failed"
         if resp != nil {
             errorMsg = resp.Message
@@ -177,7 +317,6 @@ func (s *TransferService) processExternalTransfer(ctx context.Context, transacti
         return
     }
     
-    // Update transaction as successful
     now := time.Now()
     s.transactionRepo.UpdateStatus(ctx, transaction.Reference, "success", &now)
 }
