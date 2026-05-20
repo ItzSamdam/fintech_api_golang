@@ -9,7 +9,7 @@ import (
 type AmountInKobo int64
 
 // Scan implements sql.Scanner interface
-func (a *AmountInKobo) Scan(value interface{}) error {
+func (a *AmountInKobo) Scan(value any) error {
     if value == nil {
         *a = 0
         return nil
