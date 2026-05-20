@@ -1,0 +1,832 @@
+openapi: 3.0.3
+info:
+  title: Fintech API
+  description: Production-grade fintech API for payments, transfers, bills, and savings
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@fintech.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.fintech.com/api/v1
+    description: Production server
+  - url: https://sandbox-api.fintech.com/api/v1
+    description: Sandbox server
+  - url: http://localhost:3000/api/v1
+    description: Local development
+
+tags:
+  - name: Authentication
+    description: User authentication and account management
+  - name: Wallet
+    description: Wallet operations and balance management
+  - name: Transfers
+    description: Bank and wallet transfers
+  - name: Airtime
+    description: Airtime purchases
+  - name: Data
+    description: Data bundle purchases
+  - name: Electricity
+    description: Electricity bill payments
+  - name: Betting
+    description: Betting wallet funding
+  - name: Savings
+    description: Savings goals and roundups
+  - name: Admin
+    description: Administrative operations
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    AdminAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    # Request Schemas
+    RegisterPhoneRequest:
+      type: object
+      required:
+        - phone_number
+      properties:
+        phone_number:
+          type: string
+          pattern: '^[0-9]{11}$'
+          example: "08012345678"
+    
+    VerifyOTPRequest:
+      type: object
+      required:
+        - phone_number
+        - code
+      properties:
+        phone_number:
+          type: string
+          example: "08012345678"
+        code:
+          type: string
+          example: "123456"
+        device_id:
+          type: string
+          example: "device_123"
+    
+    LoginRequest:
+      type: object
+      required:
+        - phone_number
+        - password
+      properties:
+        phone_number:
+          type: string
+          example: "08012345678"
+        password:
+          type: string
+          format: password
+          example: "Password123"
+    
+    SendTransferRequest:
+      type: object
+      required:
+        - recipient_type
+        - recipient_id
+        - amount
+      properties:
+        recipient_type:
+          type: string
+          enum: [bank, wallet]
+          example: "bank"
+        recipient_id:
+          type: string
+          example: "1234567890"
+        amount:
+          type: integer
+          description: Amount in kobo
+          example: 500000
+        narration:
+          type: string
+          example: "Payment for services"
+        recipient_bank_code:
+          type: string
+          example: "001"
+    
+    # Response Schemas
+    AuthResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        expires_in:
+          type: integer
+        token_type:
+          type: string
+        user:
+          $ref: '#/components/schemas/UserResponse'
+    
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        phone_number:
+          type: string
+        email:
+          type: string
+        tier:
+          type: integer
+        is_active:
+          type: boolean
+        is_suspended:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+    
+    WalletResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        balance:
+          type: integer
+          description: Balance in kobo
+        balance_naira:
+          type: number
+          format: float
+        currency:
+          type: string
+        is_locked:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+    
+    TransactionResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        reference:
+          type: string
+        type:
+          type: string
+          enum: [credit, debit]
+        category:
+          type: string
+          enum: [transfer, airtime, data, electricity, betting, savings]
+        amount:
+          type: integer
+        amount_naira:
+          type: number
+        fee:
+          type: integer
+        fee_naira:
+          type: number
+        status:
+          type: string
+          enum: [pending, processing, success, failed, reversed]
+        description:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+    
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        code:
+          type: string
+
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+      description: Page number
+    LimitParam:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        default: 20
+        maximum: 100
+      description: Items per page
+
+security:
+  - BearerAuth: []
+
+paths:
+  # Authentication
+  /auth/register/phone:
+    post:
+      tags: [Authentication]
+      summary: Start registration with phone number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterPhoneRequest'
+      responses:
+        '200':
+          description: OTP sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  
+  /auth/verify/otp:
+    post:
+      tags: [Authentication]
+      summary: Verify OTP and complete registration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyOTPRequest'
+      responses:
+        '200':
+          description: OTP verified successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+  
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: Login with phone and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+  
+  /auth/me:
+    get:
+      tags: [Authentication]
+      summary: Get current user profile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: User profile retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+  
+  /auth/logout:
+    post:
+      tags: [Authentication]
+      summary: Logout user
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Logged out successfully
+  
+  # Wallet
+  /wallets/balance:
+    get:
+      tags: [Wallet]
+      summary: Get wallet balance
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Balance retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletResponse'
+  
+  /wallets/transactions:
+    get:
+      tags: [Wallet]
+      summary: Get transaction history
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: category
+          in: query
+          schema:
+            type: string
+            enum: [transfer, airtime, data, electricity, betting, savings]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, success, failed]
+      responses:
+        '200':
+          description: Transaction history retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transactions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TransactionResponse'
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  limit:
+                    type: integer
+  
+  /wallets/limits:
+    get:
+      tags: [Wallet]
+      summary: Get tier-based transaction limits
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Limits retrieved
+  
+  # Transfers
+  /transfers/send:
+    post:
+      tags: [Transfers]
+      summary: Initiate transfer to bank or wallet
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendTransferRequest'
+      responses:
+        '200':
+          description: Transfer initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionResponse'
+  
+  /transfers/send-to-wallet:
+    post:
+      tags: [Transfers]
+      summary: Send money to another wallet
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - recipient_wallet_id
+                - amount
+              properties:
+                recipient_wallet_id:
+                  type: string
+                  format: uuid
+                amount:
+                  type: integer
+                narration:
+                  type: string
+      responses:
+        '200':
+          description: Transfer completed
+  
+  /transfers/name-enquiry:
+    post:
+      tags: [Transfers]
+      summary: Resolve account name before transfer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - account_number
+                - bank_code
+              properties:
+                account_number:
+                  type: string
+                bank_code:
+                  type: string
+      responses:
+        '200':
+          description: Account name resolved
+  
+  /banks/list:
+    get:
+      tags: [Transfers]
+      summary: Get list of all Nigerian banks
+      responses:
+        '200':
+          description: Banks list retrieved
+  
+  # Airtime
+  /airtime/networks:
+    get:
+      tags: [Airtime]
+      summary: List supported networks
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Networks retrieved
+  
+  /airtime/purchase:
+    post:
+      tags: [Airtime]
+      summary: Buy airtime
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - phone_number
+                - network
+                - amount
+              properties:
+                phone_number:
+                  type: string
+                network:
+                  type: string
+                  enum: [MTN, GLO, AIRTEL, 9MOBILE]
+                amount:
+                  type: integer
+      responses:
+        '200':
+          description: Airtime purchased
+  
+  # Data
+  /data/networks:
+    get:
+      tags: [Data]
+      summary: List supported data networks
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Networks retrieved
+  
+  /data/plans/{network}:
+    get:
+      tags: [Data]
+      summary: Get data plans for a network
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: network
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Data plans retrieved
+  
+  /data/purchase:
+    post:
+      tags: [Data]
+      summary: Buy data bundle
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - phone_number
+                - network
+                - plan_id
+              properties:
+                phone_number:
+                  type: string
+                network:
+                  type: string
+                plan_id:
+                  type: string
+      responses:
+        '200':
+          description: Data purchased
+  
+  # Electricity
+  /electricity/providers:
+    get:
+      tags: [Electricity]
+      summary: List DISCOs
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Providers retrieved
+  
+  /electricity/validate-meter:
+    post:
+      tags: [Electricity]
+      summary: Validate meter number
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - meter_number
+                - provider_id
+                - meter_type
+              properties:
+                meter_number:
+                  type: string
+                provider_id:
+                  type: string
+                meter_type:
+                  type: string
+                  enum: [prepaid, postpaid]
+      responses:
+        '200':
+          description: Meter validated
+  
+  /electricity/pay-prepaid:
+    post:
+      tags: [Electricity]
+      summary: Pay prepaid meter
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Payment successful
+  
+  # Betting
+  /betting/providers:
+    get:
+      tags: [Betting]
+      summary: List betting platforms
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Providers retrieved
+  
+  /betting/validate-account:
+    post:
+      tags: [Betting]
+      summary: Validate betting account
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - provider_id
+                - account_id
+              properties:
+                provider_id:
+                  type: string
+                account_id:
+                  type: string
+      responses:
+        '200':
+          description: Account validated
+  
+  /betting/fund:
+    post:
+      tags: [Betting]
+      summary: Fund betting wallet
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - provider_id
+                - account_id
+                - amount
+              properties:
+                provider_id:
+                  type: string
+                account_id:
+                  type: string
+                amount:
+                  type: integer
+      responses:
+        '200':
+          description: Wallet funded
+  
+  # Savings
+  /savings/goals/create:
+    post:
+      tags: [Savings]
+      summary: Create savings goal
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - target_amount
+                - duration_days
+              properties:
+                name:
+                  type: string
+                target_amount:
+                  type: integer
+                duration_days:
+                  type: integer
+                is_auto_debit:
+                  type: boolean
+                auto_debit_amount:
+                  type: integer
+      responses:
+        '200':
+          description: Goal created
+  
+  /savings/goals:
+    get:
+      tags: [Savings]
+      summary: List all savings goals
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Goals retrieved
+  
+  /savings/roundup/activate:
+    post:
+      tags: [Savings]
+      summary: Enable auto-roundup
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - goal_id
+                - multiplier
+              properties:
+                goal_id:
+                  type: string
+                multiplier:
+                  type: integer
+                max_daily_amount:
+                  type: integer
+      responses:
+        '200':
+          description: Roundup activated
+  
+  # Admin Routes
+  /admin/users:
+    get:
+      tags: [Admin]
+      summary: List all users
+      security:
+        - AdminAuth: []
+      responses:
+        '200':
+          description: Users retrieved
+  
+  /admin/users/{id}/suspend:
+    post:
+      tags: [Admin]
+      summary: Suspend a user
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User suspended
+  
+  /admin/transactions/reverse:
+    post:
+      tags: [Admin]
+      summary: Reverse a transaction
+      security:
+        - AdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - transaction_id
+                - reason
+              properties:
+                transaction_id:
+                  type: string
+                reason:
+                  type: string
+                notify_user:
+                  type: boolean
+      responses:
+        '200':
+          description: Transaction reversed
+  
+  /admin/providers/{id}/toggle:
+    put:
+      tags: [Admin]
+      summary: Enable/disable a provider
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                is_active:
+                  type: boolean
+      responses:
+        '200':
+          description: Provider toggled
+  
+  /admin/settings:
+    get:
+      tags: [Admin]
+      summary: Get system settings
+      security:
+        - AdminAuth: []
+      responses:
+        '200':
+          description: Settings retrieved
