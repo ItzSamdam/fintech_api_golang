@@ -27,7 +27,7 @@ func main() {
     }
     
     // Initialize Redis (if needed)
-    // redisClient := db.InitRedis(&cfg.Redis)
+    redisClient := db.InitRedis(&cfg.Redis)
     
     // Close connections on shutdown
     defer func() {
@@ -38,8 +38,8 @@ func main() {
     }()
     
     // Initialize and start server
-    // server := server.NewServer(cfg, gormDB, redisClient)
-    // if err := server.Start(); err != nil {
-    //     log.Fatalf("Failed to start server: %v", err)
-    // }
+    server := server.NewServer(cfg, gormDB, redisClient)
+    if err := server.Start(); err != nil {
+        log.Fatalf("Failed to start server: %v", err)
+    }
 }
