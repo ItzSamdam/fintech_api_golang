@@ -332,6 +332,43 @@ func (s *WalletService) getTierLimits(tier int) *TierLimits {
     return limits[0]
 }
 
+// GetTransactionByID
+func (s *WalletService) GetTransactionByID(ctx context.Context, userID uuid.UUID, transactionID string) (*response.TransactionResponse, error) {
+    // Get user's wallet
+    wallet, err := s.walletRepo.GetByUserID(ctx, userID)
+    if err != nil {
+        return nil, err
+    }
+    
+    if wallet == nil {
+        return nil, errors.New("wallet not found")
+    }
+    
+    // Parse transaction ID
+    txnID, err := uuid.Parse(transactionID)
+    if err != nil {
+        return nil, errors.New("invalid transaction ID")
+    }
+    
+    // Get transaction
+    transaction, err := s.transactionRepo.GetByID(ctx, txnID)
+    if err != nil {
+        return nil, err
+    }
+    
+    if transaction == nil {
+        return nil, errors.New("transaction not found")
+    }
+    
+    // Verify transaction belongs to user
+    if transaction.UserID != userID {
+        return nil, errors.New("unauthorized to view this transaction")
+    }
+    
+    resp := s.mapTransactionToResponse(transaction)
+    return &resp, nil
+}
+
 type TierLimits struct {
     DailyLimit    int64
     WeeklyLimit   int64
