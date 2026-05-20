@@ -5,6 +5,7 @@ go 1.24.0
 require (
 	github.com/gofiber/fiber/v2 v2.52.0
 	go.uber.org/zap v1.28.0
+	golang.org/x/crypto v0.48.0
 	gorm.io/gorm v1.25.10
 )
 
@@ -19,7 +20,6 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
-	golang.org/x/crypto v0.48.0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/text v0.34.0 // indirect
 )

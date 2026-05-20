@@ -67,13 +67,20 @@ func (h *SystemAdminHandler) HealthCheck(c *fiber.Ctx) error {
         })
     }
     
-    status := fiber.StatusOK
-    if health.Status != "healthy" {
-        status = fiber.StatusServiceUnavailable
+    healthStatus := "healthy"
+    if healthMap, ok := health.(map[string]string); ok {
+        if healthMap["status"] == "unhealthy" {
+            healthStatus = "unhealthy"
+        }
     }
     
-    return c.Status(status).JSON(response.SuccessResponse{
-        Success: health.Status == "healthy",
+    httpStatus := fiber.StatusOK
+    if healthStatus == "unhealthy" {
+        httpStatus = fiber.StatusServiceUnavailable
+    }
+    
+    return c.Status(httpStatus).JSON(response.SuccessResponse{
+        Success: healthStatus == "healthy",
         Data:    health,
     })
 }

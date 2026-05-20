@@ -80,3 +80,26 @@ type AuditLogResponse struct {
     IPAddress   string    `json:"ip_address"`
     CreatedAt   time.Time `json:"created_at"`
 }
+
+type SystemSettings struct {
+    MaintenanceMode       bool   `json:"maintenance_mode"`
+    MaintenanceMessage    string `json:"maintenance_message"`
+    GlobalDailyLimit      int64  `json:"global_daily_limit"`
+    GlobalSingleTxLimit   int64  `json:"global_single_tx_limit"`
+    MaxRetryCount         int    `json:"max_retry_count"`
+    SessionTimeout        int    `json:"session_timeout"` // seconds
+    DefaultTier           int    `json:"default_tier"`
+    MinPasswordLength     int    `json:"min_password_length"`
+    RequireEmailVerification bool `json:"require_email_verification"`
+    RequirePhoneVerification bool `json:"require_phone_verification"`
+    MaxLoginAttempts      int    `json:"max_login_attempts"`
+    OtpExpirySeconds      int    `json:"otp_expiry_seconds"`
+    TransferFeePercent    float64 `json:"transfer_fee_percent"`
+    MaxTransferFee        int64   `json:"max_transfer_fee"`
+    MinTransferAmount     int64   `json:"min_transfer_amount"`
+    MaxTransferAmount     int64   `json:"max_transfer_amount"`
+    SavingsInterestRate   float64 `json:"savings_interest_rate"`
+    ReferralBonusAmount   int64   `json:"referral_bonus_amount"`
+    Currency              string  `json:"currency"`
+    Timezone              string  `json:"timezone"`
+}
