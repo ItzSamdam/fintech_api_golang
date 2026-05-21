@@ -103,6 +103,39 @@ func (h *WalletHandler) GetTransactions(c *fiber.Ctx) error {
     })
 }
 
+// GetTransactionByID - GET /wallets/transactions/:id
+func (h *WalletHandler) GetTransactionByID(c *fiber.Ctx) error {
+    userID, err := middleware.GetUserIDFromContext(c)
+    if err != nil {
+        return c.Status(fiber.StatusUnauthorized).JSON(response.ErrorResponse{
+            Error:   "Unauthorized",
+            Message: "User not authenticated",
+        })
+    }
+    
+    transactionID := c.Params("id")
+    if transactionID == "" {
+        return c.Status(fiber.StatusBadRequest).JSON(response.ErrorResponse{
+            Error:   "Validation Error",
+            Message: "ID is required",
+        })
+    }
+    
+    resp, err := h.walletService.GetTransactionByID(c.Context(), userID, transactionID)
+    if err != nil {
+        return c.Status(fiber.StatusNotFound).JSON(response.ErrorResponse{
+            Error:   "Token Not Found",
+            Message: err.Error(),
+        })
+    }
+    
+    return c.Status(fiber.StatusOK).JSON(response.SuccessResponse{
+        Success: true,
+        Data:  resp,
+    })
+}
+
+
 // GetLimits - GET /wallets/limits
 func (h *WalletHandler) GetLimits(c *fiber.Ctx) error {
     userID, err := middleware.GetUserIDFromContext(c)

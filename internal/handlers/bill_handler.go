@@ -172,6 +172,32 @@ func (h *BillHandler) PurchaseData(c *fiber.Ctx) error {
     })
 }
 
+func (h *BillHandler) GetDataHistory(c *fiber.Ctx) error {
+    userID, err := middleware.GetUserIDFromContext(c)
+    if err != nil {
+        return c.Status(fiber.StatusUnauthorized).JSON(response.ErrorResponse{
+            Error:   "Unauthorized",
+            Message: "User not authenticated",
+        })
+    }
+    
+    offset := c.QueryInt("offset", 0)
+    limit := c.QueryInt("limit", 20)
+    
+    resp, err := h.billService.GetDataHistory(c.Context(), userID, offset, limit)
+    if err != nil {
+        return c.Status(fiber.StatusInternalServerError).JSON(response.ErrorResponse{
+            Error:   "Failed to Fetch History",
+            Message: err.Error(),
+        })
+    }
+    
+    return c.Status(fiber.StatusOK).JSON(response.SuccessResponse{
+        Success: true,
+        Data:    resp,
+    })
+}
+
 // ========== ELECTRICITY ==========
 
 // GetElectricityProviders - GET /electricity/providers
@@ -281,6 +307,33 @@ func (h *BillHandler) GetElectricityToken(c *fiber.Ctx) error {
     })
 }
 
+
+func (h *BillHandler) GetElectricityHistory(c *fiber.Ctx) error {
+    userID, err := middleware.GetUserIDFromContext(c)
+    if err != nil {
+        return c.Status(fiber.StatusUnauthorized).JSON(response.ErrorResponse{
+            Error:   "Unauthorized",
+            Message: "User not authenticated",
+        })
+    }
+    
+    offset := c.QueryInt("offset", 0)
+    limit := c.QueryInt("limit", 20)
+    
+    resp, err := h.billService.GetElectricityHistory(c.Context(), userID, offset, limit)
+    if err != nil {
+        return c.Status(fiber.StatusInternalServerError).JSON(response.ErrorResponse{
+            Error:   "Failed to Fetch History",
+            Message: err.Error(),
+        })
+    }
+    
+    return c.Status(fiber.StatusOK).JSON(response.SuccessResponse{
+        Success: true,
+        Data:    resp,
+    })
+}
+
 // ========== BETTING ==========
 
 // GetBettingProviders - GET /betting/providers
@@ -370,6 +423,33 @@ func (h *BillHandler) GetBettingHistory(c *fiber.Ctx) error {
     limit := c.QueryInt("limit", 20)
     
     resp, err := h.billService.GetBettingHistory(c.Context(), userID, offset, limit)
+    if err != nil {
+        return c.Status(fiber.StatusInternalServerError).JSON(response.ErrorResponse{
+            Error:   "Failed to Fetch History",
+            Message: err.Error(),
+        })
+    }
+    
+    return c.Status(fiber.StatusOK).JSON(response.SuccessResponse{
+        Success: true,
+        Data:    resp,
+    })
+}
+
+// GetBillHistory - GET /bills/history
+func (h *BillHandler) GetBillHistory(c *fiber.Ctx) error {
+    userID, err := middleware.GetUserIDFromContext(c)
+    if err != nil {
+        return c.Status(fiber.StatusUnauthorized).JSON(response.ErrorResponse{
+            Error:   "Unauthorized",
+            Message: "User not authenticated",
+        })
+    }
+    
+    offset := c.QueryInt("offset", 0)
+    limit := c.QueryInt("limit", 20)
+    
+    resp, err := h.billService.GetBillHistory(c.Context(), userID, offset, limit)
     if err != nil {
         return c.Status(fiber.StatusInternalServerError).JSON(response.ErrorResponse{
             Error:   "Failed to Fetch History",

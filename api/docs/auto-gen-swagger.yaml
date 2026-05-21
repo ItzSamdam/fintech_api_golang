@@ -1,0 +1,1794 @@
+﻿servers:
+- url: http://localhost:5000/api/v1
+paths:
+  /admin/transactions:
+    get:
+      summary: get /admin/transactions
+      tags:
+      - Admin Transactions
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /wallets/lock:
+    post:
+      summary: post /wallets/lock
+      tags:
+      - Wallet
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/wallets/freeze:
+    post:
+      summary: post /admin/wallets/freeze
+      tags:
+      - Admin Wallets
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/wallets/unfreeze:
+    post:
+      summary: post /admin/wallets/unfreeze
+      tags:
+      - Admin Wallets
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /auth/login:
+    post:
+      summary: post /auth/login
+      tags:
+      - Authentication
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /support/tickets/{id}/reply:
+    post:
+      summary: post /support/tickets/{id}/reply
+      tags:
+      - Support
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/transactions/reverse:
+    post:
+      summary: post /admin/transactions/reverse
+      tags:
+      - Admin Transactions
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/staff/{id}/audit:
+    get:
+      summary: get /admin/staff/{id}/audit
+      tags:
+      - Admin Roles
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/settings/audit-logs/{id}:
+    get:
+      summary: get /admin/settings/audit-logs/{id}
+      tags:
+      - Admin Settings
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/providers:
+    get:
+      summary: get /admin/providers
+      tags:
+      - Admin Providers
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/margins/{provider_id}:
+    put:
+      summary: put /admin/margins/{provider_id}
+      tags:
+      - Admin Fees
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/roles:
+    get:
+      summary: get /admin/roles
+      tags:
+      - Admin Roles
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+    post:
+      summary: post /admin/roles
+      tags:
+      - Admin Roles
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /auth/verify/face:
+    post:
+      summary: post /auth/verify/face
+      tags:
+      - Authentication
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /auth/verify/otp:
+    post:
+      summary: post /auth/verify/otp
+      tags:
+      - Authentication
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /electricity/providers:
+    get:
+      summary: get /electricity/providers
+      tags:
+      - Electricity
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /wallets/statement:
+    get:
+      summary: get /wallets/statement
+      tags:
+      - Wallet
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/roles/{id}:
+    delete:
+      summary: delete /admin/roles/{id}
+      tags:
+      - Admin Roles
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+    put:
+      summary: put /admin/roles/{id}
+      tags:
+      - Admin Roles
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/reports/daily:
+    get:
+      summary: get /admin/reports/daily
+      tags:
+      - Admin Reports
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/settings/health:
+    get:
+      summary: get /admin/settings/health
+      tags:
+      - Admin Settings
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/transactions/void:
+    post:
+      summary: post /admin/transactions/void
+      tags:
+      - Admin Transactions
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/staff/invite:
+    post:
+      summary: post /admin/staff/invite
+      tags:
+      - Admin Roles
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /notifications/in-app:
+    get:
+      summary: get /notifications/in-app
+      tags:
+      - Notifications
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /electricity/validate-meter:
+    post:
+      summary: post /electricity/validate-meter
+      tags:
+      - Electricity
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /data/history:
+    get:
+      summary: get /data/history
+      tags:
+      - Data
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /transactions/{id}:
+    get:
+      summary: get /transactions/{id}
+      tags:
+      - Transactions
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /support/tickets:
+    get:
+      summary: get /support/tickets
+      tags:
+      - Support
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /transfers/retry:
+    post:
+      summary: post /transfers/retry
+      tags:
+      - Transfer
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/providers/logs:
+    get:
+      summary: get /admin/providers/logs
+      tags:
+      - Admin Providers
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /electricity/token/{transaction_id}:
+    get:
+      summary: get /electricity/token/{transaction_id}
+      tags:
+      - Electricity
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/transactions/summary:
+    get:
+      summary: get /admin/transactions/summary
+      tags:
+      - Admin Transactions
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /security/sim-swap/check:
+    post:
+      summary: post /security/sim-swap/check
+      tags:
+      - Compliance
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/settings/audit-logs:
+    get:
+      summary: get /admin/settings/audit-logs
+      tags:
+      - Admin Settings
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/users/{id}:
+    delete:
+      summary: delete /admin/users/{id}
+      tags:
+      - Admin Users
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+    get:
+      summary: get /admin/users/{id}
+      tags:
+      - Admin Users
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/transactions/{id}:
+    get:
+      summary: get /admin/transactions/{id}
+      tags:
+      - Admin Transactions
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/staff/{id}/role:
+    put:
+      summary: put /admin/staff/{id}/role
+      tags:
+      - Admin Roles
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /wallets/limits:
+    get:
+      summary: get /wallets/limits
+      tags:
+      - Wallet
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /savings/roundup/activate:
+    post:
+      summary: post /savings/roundup/activate
+      tags:
+      - Savings
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/staff/{id}:
+    delete:
+      summary: delete /admin/staff/{id}
+      tags:
+      - Admin Roles
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/reports/export:
+    post:
+      summary: post /admin/reports/export
+      tags:
+      - Admin Reports
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/users/{id}/limits:
+    put:
+      summary: put /admin/users/{id}/limits
+      tags:
+      - Admin Users
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /compliance/report/suspicious:
+    post:
+      summary: post /compliance/report/suspicious
+      tags:
+      - Compliance
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /betting/history:
+    get:
+      summary: get /betting/history
+      tags:
+      - Betting
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/wallets:
+    get:
+      summary: get /admin/wallets
+      tags:
+      - Admin Wallets
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /data/networks:
+    get:
+      summary: get /data/networks
+      tags:
+      - Data
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /transfers/history:
+    get:
+      summary: get /transfers/history
+      tags:
+      - Transfer
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/users:
+    get:
+      summary: get /admin/users
+      tags:
+      - Admin Users
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/reports/top-users:
+    get:
+      summary: get /admin/reports/top-users
+      tags:
+      - Admin Reports
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/settings/backup/database:
+    post:
+      summary: post /admin/settings/backup/database
+      tags:
+      - Admin Settings
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /security/device/trust:
+    post:
+      summary: post /security/device/trust
+      tags:
+      - Compliance
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /auth/refresh:
+    post:
+      summary: post /auth/refresh
+      tags:
+      - Authentication
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /airtime/history:
+    get:
+      summary: get /airtime/history
+      tags:
+      - Airtime
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/reports/provider-performance:
+    get:
+      summary: get /admin/reports/provider-performance
+      tags:
+      - Admin Reports
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/margins:
+    get:
+      summary: get /admin/margins
+      tags:
+      - Admin Fees
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/reports/fraud-attempts:
+    get:
+      summary: get /admin/reports/fraud-attempts
+      tags:
+      - Admin Reports
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /betting/fund:
+    post:
+      summary: post /betting/fund
+      tags:
+      - Betting
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /electricity/history:
+    get:
+      summary: get /electricity/history
+      tags:
+      - Electricity
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/providers/{id}/priority:
+    put:
+      summary: put /admin/providers/{id}/priority
+      tags:
+      - Admin Providers
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/kyc/pending:
+    get:
+      summary: get /admin/kyc/pending
+      tags:
+      - Admin KYC
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /transfers/status/{reference}:
+    get:
+      summary: get /transfers/status/{reference}
+      tags:
+      - Transfer
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /auth/register/bvn:
+    post:
+      summary: post /auth/register/bvn
+      tags:
+      - Authentication
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/kyc/{id}:
+    get:
+      summary: get /admin/kyc/{id}
+      tags:
+      - Admin KYC
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/reports/monthly:
+    get:
+      summary: get /admin/reports/monthly
+      tags:
+      - Admin Reports
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /security/2fa/enable:
+    post:
+      summary: post /security/2fa/enable
+      tags:
+      - Compliance
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /wallets/transactions:
+    get:
+      summary: get /wallets/transactions
+      tags:
+      - Wallet
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /auth/logout:
+    post:
+      summary: post /auth/logout
+      tags:
+      - Authentication
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /savings/goals/contribute:
+    post:
+      summary: post /savings/goals/contribute
+      tags:
+      - Savings
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /betting/providers:
+    get:
+      summary: get /betting/providers
+      tags:
+      - Betting
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/wallets/credit:
+    post:
+      summary: post /admin/wallets/credit
+      tags:
+      - Admin Wallets
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /betting/validate-account:
+    post:
+      summary: post /betting/validate-account
+      tags:
+      - Betting
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/providers/{id}/toggle:
+    put:
+      summary: put /admin/providers/{id}/toggle
+      tags:
+      - Admin Providers
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /airtime/purchase:
+    post:
+      summary: post /airtime/purchase
+      tags:
+      - Airtime
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /airtime/denominations:
+    get:
+      summary: get /airtime/denominations
+      tags:
+      - Airtime
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/wallets/debit:
+    post:
+      summary: post /admin/wallets/debit
+      tags:
+      - Admin Wallets
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/wallets/{id}:
+    get:
+      summary: get /admin/wallets/{id}
+      tags:
+      - Admin Wallets
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /savings/goals/{id}:
+    get:
+      summary: get /savings/goals/{id}
+      tags:
+      - Savings
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+    put:
+      summary: put /savings/goals/{id}
+      tags:
+      - Savings
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+    delete:
+      summary: delete /savings/goals/{id}
+      tags:
+      - Savings
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /health:
+    get:
+      summary: get /health
+      tags:
+      - Health
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /:
+    get:
+      summary: get /
+      tags:
+      - Root
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /support/tickets/create:
+    post:
+      summary: post /support/tickets/create
+      tags:
+      - Support
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /auth/me:
+    get:
+      summary: get /auth/me
+      tags:
+      - Authentication
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+    put:
+      summary: put /auth/me
+      tags:
+      - Authentication
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /auth/register/phone:
+    post:
+      summary: post /auth/register/phone
+      tags:
+      - Authentication
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /security/2fa/verify:
+    post:
+      summary: post /security/2fa/verify
+      tags:
+      - Compliance
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/kyc/{id}/approve:
+    post:
+      summary: post /admin/kyc/{id}/approve
+      tags:
+      - Admin KYC
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /electricity/pay-prepaid:
+    post:
+      summary: post /electricity/pay-prepaid
+      tags:
+      - Electricity
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /wallets/balance:
+    get:
+      summary: get /wallets/balance
+      tags:
+      - Wallet
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /savings/goals/create:
+    post:
+      summary: post /savings/goals/create
+      tags:
+      - Savings
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /wallets/create:
+    post:
+      summary: post /wallets/create
+      tags:
+      - Wallet
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /auth/reset-password:
+    post:
+      summary: post /auth/reset-password
+      tags:
+      - Authentication
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/kyc/{id}/reject:
+    post:
+      summary: post /admin/kyc/{id}/reject
+      tags:
+      - Admin KYC
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /transactions:
+    get:
+      summary: get /transactions
+      tags:
+      - Transactions
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/settings:
+    get:
+      summary: get /admin/settings
+      tags:
+      - Admin Settings
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+    put:
+      summary: put /admin/settings
+      tags:
+      - Admin Settings
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/users/{id}/suspend:
+    post:
+      summary: post /admin/users/{id}/suspend
+      tags:
+      - Admin Users
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /savings/goals:
+    get:
+      summary: get /savings/goals
+      tags:
+      - Savings
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/users/search:
+    get:
+      summary: get /admin/users/search
+      tags:
+      - Admin Users
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /banks/list:
+    get:
+      summary: get /banks/list
+      tags:
+      - Transfer
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /transfers/send:
+    post:
+      summary: post /transfers/send
+      tags:
+      - Transfer
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /security/sessions:
+    get:
+      summary: get /security/sessions
+      tags:
+      - Compliance
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /wallets/unlock:
+    post:
+      summary: post /wallets/unlock
+      tags:
+      - Wallet
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /bills/history:
+    get:
+      summary: get /bills/history
+      tags:
+      - Transactions
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/reports/revenue/by-bill-type:
+    get:
+      summary: get /admin/reports/revenue/by-bill-type
+      tags:
+      - Admin Reports
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/fees:
+    get:
+      summary: get /admin/fees
+      tags:
+      - Admin Fees
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /auth/change-password:
+    post:
+      summary: post /auth/change-password
+      tags:
+      - Authentication
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /data/plans/{network}:
+    get:
+      summary: get /data/plans/{network}
+      tags:
+      - Data
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /electricity/pay-postpaid:
+    post:
+      summary: post /electricity/pay-postpaid
+      tags:
+      - Electricity
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/wallets/balances/summary:
+    get:
+      summary: get /admin/wallets/balances/summary
+      tags:
+      - Admin Wallets
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /airtime/networks:
+    get:
+      summary: get /airtime/networks
+      tags:
+      - Airtime
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /notifications/{id}/read:
+    put:
+      summary: put /notifications/{id}/read
+      tags:
+      - Notifications
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /savings/roundup/deactivate:
+    post:
+      summary: post /savings/roundup/deactivate
+      tags:
+      - Savings
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /data/purchase:
+    post:
+      summary: post /data/purchase
+      tags:
+      - Data
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/providers/{id}/health:
+    get:
+      summary: get /admin/providers/{id}/health
+      tags:
+      - Admin Providers
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/users/{id}/tier/upgrade:
+    post:
+      summary: post /admin/users/{id}/tier/upgrade
+      tags:
+      - Admin Users
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/staff:
+    get:
+      summary: get /admin/staff
+      tags:
+      - Admin Roles
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/fees/{bill_type}:
+    put:
+      summary: put /admin/fees/{bill_type}
+      tags:
+      - Admin Fees
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/settings/metrics:
+    get:
+      summary: get /admin/settings/metrics
+      tags:
+      - Admin Settings
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /compliance/limits/check:
+    get:
+      summary: get /compliance/limits/check
+      tags:
+      - Compliance
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /support/tickets/{id}:
+    get:
+      summary: get /support/tickets/{id}
+      tags:
+      - Support
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /savings/roundup/status:
+    get:
+      summary: get /savings/roundup/status
+      tags:
+      - Savings
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /transfers/name-enquiry:
+    post:
+      summary: post /transfers/name-enquiry
+      tags:
+      - Transfer
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /security/sessions/{id}:
+    delete:
+      summary: delete /security/sessions/{id}
+      tags:
+      - Compliance
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /admin/users/{id}/unsuspend:
+    post:
+      summary: post /admin/users/{id}/unsuspend
+      tags:
+      - Admin Users
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /support/tickets/{id}/status:
+    put:
+      summary: put /support/tickets/{id}/status
+      tags:
+      - Support
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+  /transfers/send-to-wallet:
+    post:
+      summary: post /transfers/send-to-wallet
+      tags:
+      - Transfer
+      responses:
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal server error
+        "400":
+          description: Bad request
+        "200":
+          description: Successful response
+openapi: 3.0.3
+info:
+  title: Fintech API
+  description: Fintech API Documentation
+  version: 1.0.0
+

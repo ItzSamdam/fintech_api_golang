@@ -1,0 +1,862 @@
+{
+  "info": {
+    "name": "Fintech API",
+    "description": "Production-grade Fintech API Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register Phone",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone_number\": \"08012345678\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register/phone",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register", "phone"]
+            }
+          }
+        },
+        {
+          "name": "Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone_number\": \"08012345678\",\n  \"code\": \"123456\",\n  \"device_id\": \"device_123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/verify/otp",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "verify", "otp"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone_number\": \"08012345678\",\n  \"password\": \"Password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "me"]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Wallet",
+      "item": [
+        {
+          "name": "Get Balance",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/wallets/balance",
+              "host": ["{{base_url}}"],
+              "path": ["wallets", "balance"]
+            }
+          }
+        },
+        {
+          "name": "Get Transactions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/wallets/transactions?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["wallets", "transactions"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Limits",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/wallets/limits",
+              "host": ["{{base_url}}"],
+              "path": ["wallets", "limits"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transfers",
+      "item": [
+        {
+          "name": "Get Banks",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/banks/list",
+              "host": ["{{base_url}}"],
+              "path": ["banks", "list"]
+            }
+          }
+        },
+        {
+          "name": "Name Enquiry",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"account_number\": \"1234567890\",\n  \"bank_code\": \"001\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/transfers/name-enquiry",
+              "host": ["{{base_url}}"],
+              "path": ["transfers", "name-enquiry"]
+            }
+          }
+        },
+        {
+          "name": "Send to Bank",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipient_type\": \"bank\",\n  \"recipient_id\": \"1234567890\",\n  \"amount\": 500000,\n  \"narration\": \"Test transfer\",\n  \"recipient_bank_code\": \"001\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/transfers/send",
+              "host": ["{{base_url}}"],
+              "path": ["transfers", "send"]
+            }
+          }
+        },
+        {
+          "name": "Send to Wallet",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipient_wallet_id\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"amount\": 100000,\n  \"narration\": \"Payment\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/transfers/send-to-wallet",
+              "host": ["{{base_url}}"],
+              "path": ["transfers", "send-to-wallet"]
+            }
+          }
+        },
+        {
+          "name": "Transfer History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/transfers/history?offset=0&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["transfers", "history"],
+              "query": [
+                {
+                  "key": "offset",
+                  "value": "0"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Check Transfer Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/transfers/status/TRF202412011200001234",
+              "host": ["{{base_url}}"],
+              "path": ["transfers", "status", "TRF202412011200001234"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bill Payments",
+      "item": [
+        {
+          "name": "Airtime Networks",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/airtime/networks",
+              "host": ["{{base_url}}"],
+              "path": ["airtime", "networks"]
+            }
+          }
+        },
+        {
+          "name": "Buy Airtime",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone_number\": \"08012345678\",\n  \"network\": \"MTN\",\n  \"amount\": 500000\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/airtime/purchase",
+              "host": ["{{base_url}}"],
+              "path": ["airtime", "purchase"]
+            }
+          }
+        },
+        {
+          "name": "Data Networks",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/data/networks",
+              "host": ["{{base_url}}"],
+              "path": ["data", "networks"]
+            }
+          }
+        },
+        {
+          "name": "Get Data Plans",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/data/plans/MTN",
+              "host": ["{{base_url}}"],
+              "path": ["data", "plans", "MTN"]
+            }
+          }
+        },
+        {
+          "name": "Buy Data",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone_number\": \"08012345678\",\n  \"network\": \"MTN\",\n  \"plan_id\": \"MTN_1GB\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/data/purchase",
+              "host": ["{{base_url}}"],
+              "path": ["data", "purchase"]
+            }
+          }
+        },
+        {
+          "name": "Electricity Providers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/electricity/providers",
+              "host": ["{{base_url}}"],
+              "path": ["electricity", "providers"]
+            }
+          }
+        },
+        {
+          "name": "Validate Meter",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"meter_number\": \"1234567890\",\n  \"provider_id\": \"IE\",\n  \"meter_type\": \"prepaid\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/electricity/validate-meter",
+              "host": ["{{base_url}}"],
+              "path": ["electricity", "validate-meter"]
+            }
+          }
+        },
+        {
+          "name": "Pay Electricity",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"meter_number\": \"1234567890\",\n  \"provider_id\": \"IE\",\n  \"meter_type\": \"prepaid\",\n  \"amount\": 1000000,\n  \"customer_name\": \"John Doe\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/electricity/pay-prepaid",
+              "host": ["{{base_url}}"],
+              "path": ["electricity", "pay-prepaid"]
+            }
+          }
+        },
+        {
+          "name": "Betting Providers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/betting/providers",
+              "host": ["{{base_url}}"],
+              "path": ["betting", "providers"]
+            }
+          }
+        },
+        {
+          "name": "Validate Betting Account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provider_id\": \"BET9JA\",\n  \"account_id\": \"user123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/betting/validate-account",
+              "host": ["{{base_url}}"],
+              "path": ["betting", "validate-account"]
+            }
+          }
+        },
+        {
+          "name": "Fund Betting",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provider_id\": \"BET9JA\",\n  \"account_id\": \"user123\",\n  \"amount\": 500000\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/betting/fund",
+              "host": ["{{base_url}}"],
+              "path": ["betting", "fund"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Savings",
+      "item": [
+        {
+          "name": "Create Savings Goal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New Phone\",\n  \"target_amount\": 50000000,\n  \"duration_days\": 90,\n  \"is_auto_debit\": true,\n  \"auto_debit_amount\": 500000\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/savings/goals/create",
+              "host": ["{{base_url}}"],
+              "path": ["savings", "goals", "create"]
+            }
+          }
+        },
+        {
+          "name": "Get Goals",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/savings/goals",
+              "host": ["{{base_url}}"],
+              "path": ["savings", "goals"]
+            }
+          }
+        },
+        {
+          "name": "Contribute to Goal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goal_id\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"amount\": 1000000\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/savings/goals/contribute",
+              "host": ["{{base_url}}"],
+              "path": ["savings", "goals", "contribute"]
+            }
+          }
+        },
+        {
+          "name": "Activate Roundup",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goal_id\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"multiplier\": 1,\n  \"max_daily_amount\": 100000\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/savings/roundup/activate",
+              "host": ["{{base_url}}"],
+              "path": ["savings", "roundup", "activate"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Admin Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@fintech.com\",\n  \"password\": \"Admin@123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/login",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "login"]
+            }
+          }
+        },
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/users?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "users"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Suspend User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Fraudulent activity\",\n  \"duration\": \"30d\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/users/123e4567-e89b-12d3-a456-426614174000/suspend",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "users", "123e4567-e89b-12d3-a456-426614174000", "suspend"]
+            }
+          }
+        },
+        {
+          "name": "List Transactions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/transactions?page=1&limit=20&status=failed",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "transactions"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": "failed"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reverse Transaction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transaction_id\": \"TXN202412011200001234\",\n  \"reason\": \"Customer complaint\",\n  \"notify_user\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/transactions/reverse",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "transactions", "reverse"]
+            }
+          }
+        },
+        {
+          "name": "Toggle Provider",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"is_active\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/providers/MTN/toggle",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "providers", "MTN", "toggle"]
+            }
+          }
+        },
+        {
+          "name": "Get Daily Report",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/reports/daily?date=2024-12-01",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "reports", "daily"],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2024-12-01"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "System Health",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/settings/health",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "settings", "health"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

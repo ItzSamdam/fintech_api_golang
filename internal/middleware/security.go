@@ -8,15 +8,35 @@ import (
 )
 
 // SecurityHeaders adds security-related headers to responses
+// func SecurityHeaders() fiber.Handler {
+//     return func(c *fiber.Ctx) error {
+//         // Set security headers
+//         c.Set("X-Content-Type-Options", "nosniff")
+//         c.Set("X-Frame-Options", "DENY")
+//         c.Set("X-XSS-Protection", "1; mode=block")
+//         c.Set("Referrer-Policy", "strict-origin-when-cross-origin")
+//         c.Set("Content-Security-Policy", "default-src 'self'")
+//         c.Set("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
+        
+//         return c.Next()
+//     }
+// }
+// 
+// // SecurityHeaders adds security-related headers to responses
 func SecurityHeaders() fiber.Handler {
     return func(c *fiber.Ctx) error {
-        // Set security headers
+        // Only relax CSP for Swagger UI endpoint
+        path := c.Path()
+        if path == "/swagger" || path == "/swagger/" || path == "/docs" {
+            c.Set("Content-Security-Policy", "default-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://unpkg.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com; img-src 'self' data: https:; font-src 'self' data: https:; connect-src 'self' https:;")
+        } else {
+            c.Set("Content-Security-Policy", "default-src 'self'")
+        }
+        
         c.Set("X-Content-Type-Options", "nosniff")
         c.Set("X-Frame-Options", "DENY")
         c.Set("X-XSS-Protection", "1; mode=block")
         c.Set("Referrer-Policy", "strict-origin-when-cross-origin")
-        c.Set("Content-Security-Policy", "default-src 'self'")
-        c.Set("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
         
         return c.Next()
     }

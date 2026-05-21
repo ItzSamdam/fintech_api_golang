@@ -4,6 +4,7 @@ import (
     "log"
     "fintech_api_golang/internal/config"
     "fintech_api_golang/internal/pkg/db"
+    "fintech_api_golang/internal/server"
 )
 
 func main() {
@@ -19,15 +20,19 @@ func main() {
         log.Fatalf("Failed to initialize database: %v", err)
     }
     
-    // Run migrations (only in development)
-    if cfg.Environment == "development" {
-        if err := db.RunMigrations(gormDB); err != nil {
-            log.Fatalf("Failed to run migrations: %v", err)
+    // Run migrations (only in development and if not already run)
+        if cfg.Environment == "development" {
+            if err := db.RunMigrationsIfNeeded(gormDB); err != nil {
+                log.Fatalf("Failed to run migrations: %v", err)
+            }
         }
-    }
+        
     
     // Initialize Redis (if needed)
-    redisClient := db.InitRedis(&cfg.Redis)
+    redisClient, err := db.InitRedis(&cfg.Redis)
+    if err != nil {
+        log.Fatalf("Failed to initialize Redis: %v", err)
+    }
     
     // Close connections on shutdown
     defer func() {
