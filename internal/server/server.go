@@ -3,6 +3,9 @@ package server
 import (
     "fmt"
     "log"
+    "os"
+    "os/signal"
+    "syscall"
     
     "github.com/gofiber/fiber/v2"
     "github.com/redis/go-redis/v9"
@@ -22,7 +25,6 @@ type Server struct {
 }
 
 func NewServer(cfg *config.Config, db *gorm.DB, rdb *redis.Client) *Server {
-    // Create logger
     var logger *zap.Logger
     var err error
     
@@ -36,7 +38,6 @@ func NewServer(cfg *config.Config, db *gorm.DB, rdb *redis.Client) *Server {
         log.Fatalf("Failed to create logger: %v", err)
     }
     
-    // Create fiber app
     app := fiber.New(fiber.Config{
         AppName:      "Fintech API",
         Prefork:      false,
@@ -57,15 +58,26 @@ func (s *Server) Start() error {
     // Setup routes
     routes.SetupRoutes(s.app, s.db, s.rdb, s.logger, s.cfg)
     
-    // Start server
+    // Start server in a goroutine
     addr := fmt.Sprintf(":%s", s.cfg.Port)
-    log.Printf("Server starting on %s", addr)
-    log.Printf("Environment: %s", s.cfg.Environment)
     
-    return s.app.Listen(addr)
-}
-
-func (s *Server) Shutdown() error {
+    // Handle graceful shutdown
+    go func() {
+        log.Printf("Server starting on %s", addr)
+        log.Printf("Environment: %s", s.cfg.Environment)
+        log.Printf("Press Ctrl+C to stop")
+        
+        if err := s.app.Listen(addr); err != nil {
+            log.Fatalf("Server failed to start: %v", err)
+        }
+    }()
+    
+    // Wait for interrupt signal
+    quit := make(chan os.Signal, 1)
+    signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+    <-quit
+    
+    log.Println("Shutting down server...")
     return s.app.Shutdown()
 }
 

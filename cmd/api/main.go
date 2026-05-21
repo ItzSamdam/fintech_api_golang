@@ -20,12 +20,13 @@ func main() {
         log.Fatalf("Failed to initialize database: %v", err)
     }
     
-    // Run migrations (only in development)
-    if cfg.Environment == "development" {
-        if err := db.RunMigrations(gormDB); err != nil {
-            log.Fatalf("Failed to run migrations: %v", err)
+    // Run migrations (only in development and if not already run)
+        if cfg.Environment == "development" {
+            if err := db.RunMigrationsIfNeeded(gormDB); err != nil {
+                log.Fatalf("Failed to run migrations: %v", err)
+            }
         }
-    }
+        
     
     // Initialize Redis (if needed)
     redisClient, err := db.InitRedis(&cfg.Redis)

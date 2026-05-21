@@ -107,6 +107,57 @@ func SetupRoutes(app *fiber.App, db *gorm.DB, rdb *redisLib.Client, logger *zap.
     app.Use(middleware.SecurityHeaders())
     app.Use(middleware.Compression())
     app.Use(middleware.Helmet())
+
+    
+    // ========== SERVER CHECK ==========
+    app.Get("/", func(c *fiber.Ctx) error {
+        return c.JSON(fiber.Map{
+            "status": "ok",
+            "time":   time.Now().Unix(),
+            "data": fiber.Map{
+                "version":     "1.0.0",
+                "environment": cfg.Environment,
+                "port":        cfg.Port,
+                "debug":       cfg.Debug,
+                "message":     "Server is running",
+            },
+        })
+    })
+
+    // In SetupRoutes function, add:
+    // Add this route to serve Swagger UI
+    // Swagger UI route - add this BEFORE the SecurityHeaders middleware
+    app.Get("/swagger", func(c *fiber.Ctx) error {
+        // Remove restrictive headers for Swagger
+        c.Set("Content-Security-Policy", "")
+        c.Set("X-Content-Type-Options", "")
+        c.Set("X-Frame-Options", "")
+        
+        html := `<!DOCTYPE html>
+    <html>
+    <head>
+        <title>Fintech API Documentation</title>
+        <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
+    </head>
+    <body>
+        <div id="swagger-ui"></div>
+        <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+        <script>
+            window.onload = function() {
+                SwaggerUIBundle({
+                    url: "/docs/swagger.yaml",
+                    dom_id: '#swagger-ui',
+                    presets: [SwaggerUIBundle.presets.apis],
+                    layout: "BaseLayout",
+                    deepLinking: true
+                });
+            }
+        </script>
+    </body>
+    </html>`
+        return c.Type("html").Send([]byte(html))
+    })
+
     
     // ========== HEALTH CHECK ==========
     app.Get("/health", func(c *fiber.Ctx) error {

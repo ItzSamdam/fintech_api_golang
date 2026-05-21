@@ -144,3 +144,91 @@ func findSubstring(s, substr string) bool {
     }
     return false
 }
+// RunMigrationsIfNeeded checks if migrations have already been run
+// 
+// // Check if users table exists (indicating migrations were already run)
+func RunMigrationsIfNeeded(db *gorm.DB) error {
+    if db.Migrator().HasTable("users") {
+        log.Println("Tables already exist. Skipping migrations.")
+        return nil
+    }
+    
+    log.Println("No tables found. Running migrations...")
+    return RunMigrations(db)
+}
+    
+// func RunMigrationsIfNeeded(db *gorm.DB) error {
+//     // Check if migration tracking table exists
+//     if !db.Migrator().HasTable("schema_migrations") {
+//         log.Println("No migration tracking found, running all migrations...")
+//         return RunMigrations(db)
+//     }
+    
+//     // Get last migration version
+//     var lastMigration struct {
+//         Version uint
+//     }
+    
+//     result := db.Table("schema_migrations").Select("MAX(version) as version").Scan(&lastMigration)
+//     if result.Error != nil {
+//         log.Printf("Failed to get last migration version: %v", result.Error)
+//         log.Println("Running migrations anyway...")
+//         return RunMigrations(db)
+//     }
+    
+//     // Define expected migrations (update this as you add migrations)
+//     expectedMigrations := []string{
+//         "000_init_extensions",
+//         "001_create_users_table",
+//         "002_create_kyc_table",
+//         "003_create_sessions_table",
+//         "004_create_trusted_devices_table",
+//         "005_create_2fa_table",
+//         "006_create_otp_table",
+//         "007_create_wallets_table",
+//         "008_create_transactions_table",
+//         "009_create_transfer_details_table",
+//         "010_create_providers_table",
+//         "011_create_bill_details_table",
+//         "012_create_provider_logs_table",
+//         "013_create_savings_goals_table",
+//         "014_create_savings_contributions_table",
+//         "015_create_auto_roundup_table",
+//         "016_create_fee_configs_table",
+//         "017_create_tier_limits_table",
+//         "018_create_admin_users_table",
+//         "019_create_roles_table",
+//         "020_create_audit_logs_table",
+//         "021_create_support_tickets_table",
+//         "022_create_ticket_messages_table",
+//         "023_seed_default_data",
+//     }
+    
+//     if lastMigration.Version >= uint(len(expectedMigrations)) {
+//         log.Printf("Migrations already completed (version %d). Skipping...", lastMigration.Version)
+//         return nil
+//     }
+    
+//     log.Printf("Migrations incomplete. Last version: %d, Expected: %d. Running missing migrations...", 
+//         lastMigration.Version, len(expectedMigrations))
+//     return RunMigrations(db)
+// }
+
+// // CreateMigrationTable creates the schema_migrations table if it doesn't exist
+// func CreateMigrationTable(db *gorm.DB) error {
+//     if !db.Migrator().HasTable("schema_migrations") {
+//         return db.Exec(`CREATE TABLE IF NOT EXISTS schema_migrations (
+//             version BIGINT PRIMARY KEY,
+//             dirty BOOLEAN NOT NULL DEFAULT FALSE,
+//             executed_at TIMESTAMP NOT NULL DEFAULT NOW()
+//         )`).Error
+//     }
+//     return nil
+// }
+
+// // RecordMigration records a successful migration
+// func RecordMigration(db *gorm.DB, version uint) error {
+//     return db.Exec(`INSERT INTO schema_migrations (version, dirty, executed_at) 
+//         VALUES (?, FALSE, NOW()) 
+//         ON CONFLICT (version) DO UPDATE SET dirty = FALSE, executed_at = NOW()`, version).Error
+// }
