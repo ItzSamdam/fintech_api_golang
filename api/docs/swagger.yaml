@@ -14,7 +14,7 @@ servers:
     description: Production server
   - url: https://sandbox-api.fintech.com/api/v1
     description: Sandbox server
-  - url: http://localhost:3000/api/v1
+  - url: http://localhost:5000/api/v1
     description: Local development
 
 tags:
@@ -34,8 +34,30 @@ tags:
     description: Betting wallet funding
   - name: Savings
     description: Savings goals and roundups
+  - name: Compliance
+    description: Security and compliance operations
+  - name: Support
+    description: Customer support tickets
+  - name: Notifications
+    description: In-app notifications
   - name: Admin
     description: Administrative operations
+  - name: Admin Users
+    description: Admin user management
+  - name: Admin Transactions
+    description: Admin transaction management
+  - name: Admin Wallets
+    description: Admin wallet management
+  - name: Admin KYC
+    description: Admin KYC management
+  - name: Admin Providers
+    description: Admin provider management
+  - name: Admin Reports
+    description: Admin reports and analytics
+  - name: Admin Settings
+    description: System settings
+  - name: Admin Roles
+    description: Role and permission management
 
 components:
   securitySchemes:
@@ -49,7 +71,6 @@ components:
       bearerFormat: JWT
 
   schemas:
-    # Request Schemas
     RegisterPhoneRequest:
       type: object
       required:
@@ -57,9 +78,9 @@ components:
       properties:
         phone_number:
           type: string
-          pattern: '^[0-9]{11}$'
+          pattern: "^[0-9]{11}$"
           example: "08012345678"
-    
+
     VerifyOTPRequest:
       type: object
       required:
@@ -75,7 +96,49 @@ components:
         device_id:
           type: string
           example: "device_123"
-    
+        device_name:
+          type: string
+          example: "iPhone 15"
+
+    RegisterBVNRequest:
+      type: object
+      required:
+        - bvn
+        - nin
+        - date_of_birth
+        - first_name
+        - last_name
+      properties:
+        bvn:
+          type: string
+          example: "12345678901"
+        nin:
+          type: string
+          example: "12345678901"
+        date_of_birth:
+          type: string
+          example: "1990-01-01"
+        first_name:
+          type: string
+          example: "John"
+        last_name:
+          type: string
+          example: "Doe"
+        middle_name:
+          type: string
+          example: "Smith"
+
+    VerifyFaceRequest:
+      type: object
+      required:
+        - face_photo
+      properties:
+        face_photo:
+          type: string
+          description: Base64 encoded image
+        liveness_video:
+          type: string
+
     LoginRequest:
       type: object
       required:
@@ -88,8 +151,70 @@ components:
         password:
           type: string
           format: password
-          example: "Password123"
-    
+        device_id:
+          type: string
+
+    ChangePasswordRequest:
+      type: object
+      required:
+        - old_password
+        - new_password
+      properties:
+        old_password:
+          type: string
+        new_password:
+          type: string
+          minLength: 6
+
+    ResetPasswordRequest:
+      type: object
+      required:
+        - phone_number
+        - code
+        - new_password
+      properties:
+        phone_number:
+          type: string
+        code:
+          type: string
+        new_password:
+          type: string
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        address:
+          type: string
+        date_of_birth:
+          type: string
+
+    RefreshTokenRequest:
+      type: object
+      required:
+        - refresh_token
+      properties:
+        refresh_token:
+          type: string
+
+    LogoutRequest:
+      type: object
+      properties:
+        all_devices:
+          type: boolean
+
+    CreateWalletRequest:
+      type: object
+      properties:
+        currency:
+          type: string
+          default: NGN
+
     SendTransferRequest:
       type: object
       required:
@@ -100,22 +225,202 @@ components:
         recipient_type:
           type: string
           enum: [bank, wallet]
-          example: "bank"
         recipient_id:
           type: string
-          example: "1234567890"
         amount:
           type: integer
           description: Amount in kobo
-          example: 500000
         narration:
           type: string
-          example: "Payment for services"
         recipient_bank_code:
           type: string
-          example: "001"
-    
-    # Response Schemas
+        save_beneficiary:
+          type: boolean
+
+    NameEnquiryRequest:
+      type: object
+      required:
+        - account_number
+        - bank_code
+      properties:
+        account_number:
+          type: string
+        bank_code:
+          type: string
+
+    PurchaseAirtimeRequest:
+      type: object
+      required:
+        - phone_number
+        - network
+        - amount
+      properties:
+        phone_number:
+          type: string
+        network:
+          type: string
+          enum: [MTN, GLO, AIRTEL, 9MOBILE]
+        amount:
+          type: integer
+        save_beneficiary:
+          type: boolean
+
+    PurchaseDataRequest:
+      type: object
+      required:
+        - phone_number
+        - network
+        - plan_id
+      properties:
+        phone_number:
+          type: string
+        network:
+          type: string
+        plan_id:
+          type: string
+
+    ValidateMeterRequest:
+      type: object
+      required:
+        - meter_number
+        - provider_id
+        - meter_type
+      properties:
+        meter_number:
+          type: string
+        provider_id:
+          type: string
+        meter_type:
+          type: string
+          enum: [prepaid, postpaid]
+
+    PayElectricityRequest:
+      type: object
+      required:
+        - meter_number
+        - provider_id
+        - meter_type
+        - amount
+      properties:
+        meter_number:
+          type: string
+        provider_id:
+          type: string
+        meter_type:
+          type: string
+        amount:
+          type: integer
+        customer_name:
+          type: string
+        address:
+          type: string
+        email:
+          type: string
+
+    ValidateBettingAccountRequest:
+      type: object
+      required:
+        - provider_id
+        - account_id
+      properties:
+        provider_id:
+          type: string
+        account_id:
+          type: string
+
+    FundBettingRequest:
+      type: object
+      required:
+        - provider_id
+        - account_id
+        - amount
+      properties:
+        provider_id:
+          type: string
+        account_id:
+          type: string
+        amount:
+          type: integer
+
+    CreateSavingsGoalRequest:
+      type: object
+      required:
+        - name
+        - target_amount
+        - duration_days
+      properties:
+        name:
+          type: string
+        target_amount:
+          type: integer
+        duration_days:
+          type: integer
+        is_auto_debit:
+          type: boolean
+        auto_debit_amount:
+          type: integer
+        auto_debit_day:
+          type: integer
+
+    ContributeToGoalRequest:
+      type: object
+      required:
+        - goal_id
+        - amount
+      properties:
+        goal_id:
+          type: string
+        amount:
+          type: integer
+        source_wallet_id:
+          type: string
+
+    ActivateRoundupRequest:
+      type: object
+      required:
+        - goal_id
+        - multiplier
+      properties:
+        goal_id:
+          type: string
+        multiplier:
+          type: integer
+        max_daily_amount:
+          type: integer
+
+    ReportSuspiciousRequest:
+      type: object
+      required:
+        - transaction_id
+        - reason
+      properties:
+        transaction_id:
+          type: string
+        reason:
+          type: string
+        description:
+          type: string
+
+    CreateTicketRequest:
+      type: object
+      required:
+        - category
+        - subject
+        - description
+      properties:
+        category:
+          type: string
+          enum: [transaction, account, billing, technical, other]
+        subject:
+          type: string
+        description:
+          type: string
+        transaction_id:
+          type: string
+        priority:
+          type: string
+          enum: [low, medium, high, urgent]
+
     AuthResponse:
       type: object
       properties:
@@ -128,8 +433,8 @@ components:
         token_type:
           type: string
         user:
-          $ref: '#/components/schemas/UserResponse'
-    
+          $ref: "#/components/schemas/UserResponse"
+
     UserResponse:
       type: object
       properties:
@@ -140,6 +445,10 @@ components:
           type: string
         email:
           type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
         tier:
           type: integer
         is_active:
@@ -149,7 +458,10 @@ components:
         created_at:
           type: string
           format: date-time
-    
+        updated_at:
+          type: string
+          format: date-time
+
     WalletResponse:
       type: object
       properties:
@@ -164,7 +476,6 @@ components:
           description: Balance in kobo
         balance_naira:
           type: number
-          format: float
         currency:
           type: string
         is_locked:
@@ -172,7 +483,22 @@ components:
         created_at:
           type: string
           format: date-time
-    
+        updated_at:
+          type: string
+          format: date-time
+
+    BalanceResponse:
+      type: object
+      properties:
+        balance:
+          type: integer
+        balance_naira:
+          type: number
+        currency:
+          type: string
+        is_locked:
+          type: boolean
+
     TransactionResponse:
       type: object
       properties:
@@ -186,7 +512,8 @@ components:
           enum: [credit, debit]
         category:
           type: string
-          enum: [transfer, airtime, data, electricity, betting, savings]
+        sub_category:
+          type: string
         amount:
           type: integer
         amount_naira:
@@ -195,15 +522,224 @@ components:
           type: integer
         fee_naira:
           type: number
+        total_amount:
+          type: integer
+        total_amount_naira:
+          type: number
         status:
           type: string
-          enum: [pending, processing, success, failed, reversed]
         description:
+          type: string
+        balance_before:
+          type: integer
+        balance_after:
+          type: integer
+        completed_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        transfer_detail:
+          $ref: "#/components/schemas/TransferDetailResponse"
+        bill_detail:
+          $ref: "#/components/schemas/BillDetailResponse"
+
+    TransferDetailResponse:
+      type: object
+      properties:
+        recipient_type:
+          type: string
+        recipient_id:
+          type: string
+        recipient_name:
+          type: string
+        recipient_bank:
+          type: string
+        narration:
+          type: string
+
+    BillDetailResponse:
+      type: object
+      properties:
+        bill_type:
+          type: string
+        provider_name:
+          type: string
+        phone_number:
+          type: string
+        meter_number:
+          type: string
+        customer_name:
+          type: string
+        electricity_token:
+          type: string
+        data_plan_name:
+          type: string
+        data_volume:
+          type: string
+
+    TransactionHistoryResponse:
+      type: object
+      properties:
+        transactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/TransactionResponse"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        total_pages:
+          type: integer
+
+    TierLimitResponse:
+      type: object
+      properties:
+        tier:
+          type: integer
+        daily_limit:
+          type: integer
+        weekly_limit:
+          type: integer
+        monthly_limit:
+          type: integer
+        single_tx_limit:
+          type: integer
+        daily_spent:
+          type: integer
+        weekly_spent:
+          type: integer
+        monthly_spent:
+          type: integer
+        daily_remaining:
+          type: integer
+        weekly_remaining:
+          type: integer
+        monthly_remaining:
+          type: integer
+
+    BankListResponse:
+      type: object
+      properties:
+        banks:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+              name:
+                type: string
+
+    NameEnquiryResponse:
+      type: object
+      properties:
+        account_number:
+          type: string
+        account_name:
+          type: string
+        bank_code:
+          type: string
+        bank_name:
+          type: string
+
+    MeterValidationResponse:
+      type: object
+      properties:
+        customer_name:
+          type: string
+        customer_address:
+          type: string
+        meter_number:
+          type: string
+        meter_type:
+          type: string
+        provider_id:
+          type: string
+        provider_name:
+          type: string
+
+    ElectricityPaymentResponse:
+      type: object
+      properties:
+        transaction_id:
+          type: string
+        reference:
+          type: string
+        meter_number:
+          type: string
+        customer_name:
+          type: string
+        amount:
+          type: integer
+        amount_naira:
+          type: number
+        token:
+          type: string
+        units:
+          type: integer
+        status:
+          type: string
+
+    BettingAccountResponse:
+      type: object
+      properties:
+        provider_id:
+          type: string
+        provider_name:
+          type: string
+        account_id:
+          type: string
+        account_name:
+          type: string
+        is_valid:
+          type: boolean
+        balance:
+          type: integer
+
+    SavingsGoalResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        target_amount:
+          type: integer
+        target_amount_naira:
+          type: number
+        current_amount:
+          type: integer
+        current_amount_naira:
+          type: number
+        progress_percent:
+          type: number
+        interest_rate:
+          type: number
+        duration_days:
+          type: integer
+        start_date:
+          type: string
+          format: date-time
+        target_date:
+          type: string
+          format: date-time
+        days_remaining:
+          type: integer
+        is_auto_debit:
+          type: boolean
+        auto_debit_amount:
+          type: integer
+        status:
           type: string
         created_at:
           type: string
           format: date-time
-    
+
     SuccessResponse:
       type: object
       properties:
@@ -213,7 +749,7 @@ components:
           type: string
         data:
           type: object
-    
+
     ErrorResponse:
       type: object
       properties:
@@ -231,7 +767,6 @@ components:
       schema:
         type: integer
         default: 1
-      description: Page number
     LimitParam:
       name: limit
       in: query
@@ -239,13 +774,45 @@ components:
         type: integer
         default: 20
         maximum: 100
-      description: Items per page
+    OffsetParam:
+      name: offset
+      in: query
+      schema:
+        type: integer
+        default: 0
+    TransactionIDParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    ReferenceParam:
+      name: reference
+      in: path
+      required: true
+      schema:
+        type: string
+    NetworkParam:
+      name: network
+      in: path
+      required: true
+      schema:
+        type: string
 
 security:
   - BearerAuth: []
 
 paths:
-  # Authentication
+  # ========== HEALTH ==========
+  /health:
+    get:
+      tags: [Authentication]
+      summary: Health check
+      responses:
+        "200":
+          description: Service is healthy
+
+  # ========== AUTHENTICATION ==========
   /auth/register/phone:
     post:
       tags: [Authentication]
@@ -255,15 +822,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RegisterPhoneRequest'
+              $ref: "#/components/schemas/RegisterPhoneRequest"
       responses:
-        '200':
+        "200":
           description: OTP sent successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
-  
+                $ref: "#/components/schemas/SuccessResponse"
+
   /auth/verify/otp:
     post:
       tags: [Authentication]
@@ -273,15 +840,47 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/VerifyOTPRequest'
+              $ref: "#/components/schemas/VerifyOTPRequest"
       responses:
-        '200':
+        "200":
           description: OTP verified successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthResponse'
-  
+                $ref: "#/components/schemas/AuthResponse"
+
+  /auth/register/bvn:
+    post:
+      tags: [Authentication]
+      summary: Submit BVN + NIN for Tier upgrade
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterBVNRequest"
+      responses:
+        "200":
+          description: BVN verified successfully
+
+  /auth/verify/face:
+    post:
+      tags: [Authentication]
+      summary: Liveness + face match against BVN photo
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyFaceRequest"
+      responses:
+        "200":
+          description: Face verified successfully
+
   /auth/login:
     post:
       tags: [Authentication]
@@ -291,15 +890,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LoginRequest'
+              $ref: "#/components/schemas/LoginRequest"
       responses:
-        '200':
+        "200":
           description: Login successful
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthResponse'
-  
+                $ref: "#/components/schemas/AuthResponse"
+
   /auth/me:
     get:
       tags: [Authentication]
@@ -307,91 +906,16 @@ paths:
       security:
         - BearerAuth: []
       responses:
-        '200':
+        "200":
           description: User profile retrieved
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserResponse'
-  
-  /auth/logout:
-    post:
+                $ref: "#/components/schemas/UserResponse"
+
+    put:
       tags: [Authentication]
-      summary: Logout user
-      security:
-        - BearerAuth: []
-      responses:
-        '200':
-          description: Logged out successfully
-  
-  # Wallet
-  /wallets/balance:
-    get:
-      tags: [Wallet]
-      summary: Get wallet balance
-      security:
-        - BearerAuth: []
-      responses:
-        '200':
-          description: Balance retrieved
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WalletResponse'
-  
-  /wallets/transactions:
-    get:
-      tags: [Wallet]
-      summary: Get transaction history
-      security:
-        - BearerAuth: []
-      parameters:
-        - $ref: '#/components/parameters/PageParam'
-        - $ref: '#/components/parameters/LimitParam'
-        - name: category
-          in: query
-          schema:
-            type: string
-            enum: [transfer, airtime, data, electricity, betting, savings]
-        - name: status
-          in: query
-          schema:
-            type: string
-            enum: [pending, success, failed]
-      responses:
-        '200':
-          description: Transaction history retrieved
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  transactions:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/TransactionResponse'
-                  total:
-                    type: integer
-                  page:
-                    type: integer
-                  limit:
-                    type: integer
-  
-  /wallets/limits:
-    get:
-      tags: [Wallet]
-      summary: Get tier-based transaction limits
-      security:
-        - BearerAuth: []
-      responses:
-        '200':
-          description: Limits retrieved
-  
-  # Transfers
-  /transfers/send:
-    post:
-      tags: [Transfers]
-      summary: Initiate transfer to bank or wallet
+      summary: Update user details
       security:
         - BearerAuth: []
       requestBody:
@@ -399,15 +923,263 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SendTransferRequest'
+              $ref: "#/components/schemas/UpdateUserRequest"
       responses:
-        '200':
+        "200":
+          description: Profile updated successfully
+
+  /auth/change-password:
+    post:
+      tags: [Authentication]
+      summary: Change user password
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangePasswordRequest"
+      responses:
+        "200":
+          description: Password changed successfully
+
+  /auth/reset-password:
+    post:
+      tags: [Authentication]
+      summary: Initiate password reset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetPasswordRequest"
+      responses:
+        "200":
+          description: Password reset successfully
+
+  /auth/refresh:
+    post:
+      tags: [Authentication]
+      summary: Refresh access token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshTokenRequest"
+      responses:
+        "200":
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+
+  /auth/logout:
+    post:
+      tags: [Authentication]
+      summary: Invalidate session / token
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LogoutRequest"
+      responses:
+        "200":
+          description: Logged out successfully
+
+  # ========== WALLET ==========
+  /wallets/create:
+    post:
+      tags: [Wallet]
+      summary: Create wallet for user
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWalletRequest"
+      responses:
+        "200":
+          description: Wallet created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletResponse"
+
+  /wallets/balance:
+    get:
+      tags: [Wallet]
+      summary: Get current wallet balance
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Balance retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BalanceResponse"
+
+  /wallets/transactions:
+    get:
+      tags: [Wallet]
+      summary: Paginated transaction history
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/LimitParam"
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: from_date
+          in: query
+          schema:
+            type: string
+        - name: to_date
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Transaction history retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionHistoryResponse"
+
+  /wallets/limits:
+    get:
+      tags: [Wallet]
+      summary: Tier-based daily/weekly/monthly limits
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Limits retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TierLimitResponse"
+
+  /wallets/lock:
+    post:
+      tags: [Wallet]
+      summary: Temporarily lock wallet
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+      responses:
+        "200":
+          description: Wallet locked successfully
+
+  /wallets/unlock:
+    post:
+      tags: [Wallet]
+      summary: Unlock wallet
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Wallet unlocked successfully
+
+  /wallets/statement:
+    get:
+      tags: [Wallet]
+      summary: Download account statement
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: from_date
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: to_date
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [pdf, csv]
+      responses:
+        "200":
+          description: Statement generated
+
+  # ========== TRANSFERS ==========
+  /banks/list:
+    get:
+      tags: [Transfers]
+      summary: Get list of all Nigerian banks + codes
+      responses:
+        "200":
+          description: Banks list retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BankListResponse"
+
+  /transfers/name-enquiry:
+    post:
+      tags: [Transfers]
+      summary: Resolve account name before transfer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NameEnquiryRequest"
+      responses:
+        "200":
+          description: Account name resolved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NameEnquiryResponse"
+
+  /transfers/send:
+    post:
+      tags: [Transfers]
+      summary: Initiate transfer to bank account or wallet ID
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendTransferRequest"
+      responses:
+        "200":
           description: Transfer initiated
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TransactionResponse'
-  
+                $ref: "#/components/schemas/TransactionResponse"
+
   /transfers/send-to-wallet:
     post:
       tags: [Transfers]
@@ -432,13 +1204,35 @@ paths:
                 narration:
                   type: string
       responses:
-        '200':
+        "200":
           description: Transfer completed
-  
-  /transfers/name-enquiry:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionResponse"
+
+  /transfers/status/{reference}:
+    get:
+      tags: [Transfers]
+      summary: Query transfer status
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/ReferenceParam"
+      responses:
+        "200":
+          description: Transfer status retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionResponse"
+
+  /transfers/retry:
     post:
       tags: [Transfers]
-      summary: Resolve account name before transfer
+      summary: Retry failed debit (idempotent)
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -446,26 +1240,32 @@ paths:
             schema:
               type: object
               required:
-                - account_number
-                - bank_code
+                - reference
               properties:
-                account_number:
-                  type: string
-                bank_code:
+                reference:
                   type: string
       responses:
-        '200':
-          description: Account name resolved
-  
-  /banks/list:
+        "200":
+          description: Transfer retry initiated
+
+  /transfers/history:
     get:
       tags: [Transfers]
-      summary: Get list of all Nigerian banks
+      summary: Get user's transfer history
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/OffsetParam"
+        - $ref: "#/components/parameters/LimitParam"
       responses:
-        '200':
-          description: Banks list retrieved
-  
-  # Airtime
+        "200":
+          description: Transfer history retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionHistoryResponse"
+
+  # ========== AIRTIME ==========
   /airtime/networks:
     get:
       tags: [Airtime]
@@ -473,9 +1273,19 @@ paths:
       security:
         - BearerAuth: []
       responses:
-        '200':
+        "200":
           description: Networks retrieved
-  
+
+  /airtime/denominations:
+    get:
+      tags: [Airtime]
+      summary: Get available airtime amounts
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Denominations retrieved
+
   /airtime/purchase:
     post:
       tags: [Airtime]
@@ -487,50 +1297,51 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - phone_number
-                - network
-                - amount
-              properties:
-                phone_number:
-                  type: string
-                network:
-                  type: string
-                  enum: [MTN, GLO, AIRTEL, 9MOBILE]
-                amount:
-                  type: integer
+              $ref: "#/components/schemas/PurchaseAirtimeRequest"
       responses:
-        '200':
+        "200":
           description: Airtime purchased
-  
-  # Data
-  /data/networks:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionResponse"
+
+  /airtime/history:
     get:
-      tags: [Data]
-      summary: List supported data networks
-      security:
-        - BearerAuth: []
-      responses:
-        '200':
-          description: Networks retrieved
-  
-  /data/plans/{network}:
-    get:
-      tags: [Data]
-      summary: Get data plans for a network
+      tags: [Airtime]
+      summary: Airtime purchase history
       security:
         - BearerAuth: []
       parameters:
-        - name: network
-          in: path
-          required: true
-          schema:
-            type: string
+        - $ref: "#/components/parameters/OffsetParam"
+        - $ref: "#/components/parameters/LimitParam"
       responses:
-        '200':
+        "200":
+          description: History retrieved
+
+  # ========== DATA ==========
+  /data/networks:
+    get:
+      tags: [Data]
+      summary: List supported networks
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Networks retrieved
+
+  /data/plans/{network}:
+    get:
+      tags: [Data]
+      summary: Get data plans by network
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/NetworkParam"
+      responses:
+        "200":
           description: Data plans retrieved
-  
+
   /data/purchase:
     post:
       tags: [Data]
@@ -542,23 +1353,29 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - phone_number
-                - network
-                - plan_id
-              properties:
-                phone_number:
-                  type: string
-                network:
-                  type: string
-                plan_id:
-                  type: string
+              $ref: "#/components/schemas/PurchaseDataRequest"
       responses:
-        '200':
+        "200":
           description: Data purchased
-  
-  # Electricity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionResponse"
+
+  /data/history:
+    get:
+      tags: [Data]
+      summary: Data purchase history
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/OffsetParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: History retrieved
+
+  # ========== ELECTRICITY ==========
   /electricity/providers:
     get:
       tags: [Electricity]
@@ -566,9 +1383,9 @@ paths:
       security:
         - BearerAuth: []
       responses:
-        '200':
+        "200":
           description: Providers retrieved
-  
+
   /electricity/validate-meter:
     post:
       tags: [Electricity]
@@ -580,23 +1397,15 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - meter_number
-                - provider_id
-                - meter_type
-              properties:
-                meter_number:
-                  type: string
-                provider_id:
-                  type: string
-                meter_type:
-                  type: string
-                  enum: [prepaid, postpaid]
+              $ref: "#/components/schemas/ValidateMeterRequest"
       responses:
-        '200':
+        "200":
           description: Meter validated
-  
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MeterValidationResponse"
+
   /electricity/pay-prepaid:
     post:
       tags: [Electricity]
@@ -608,26 +1417,19 @@ paths:
         content:
           application/json:
             schema:
-              type: object
+              $ref: "#/components/schemas/PayElectricityRequest"
       responses:
-        '200':
+        "200":
           description: Payment successful
-  
-  # Betting
-  /betting/providers:
-    get:
-      tags: [Betting]
-      summary: List betting platforms
-      security:
-        - BearerAuth: []
-      responses:
-        '200':
-          description: Providers retrieved
-  
-  /betting/validate-account:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ElectricityPaymentResponse"
+
+  /electricity/pay-postpaid:
     post:
-      tags: [Betting]
-      summary: Validate betting account
+      tags: [Electricity]
+      summary: Pay postpaid bill
       security:
         - BearerAuth: []
       requestBody:
@@ -635,19 +1437,67 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - provider_id
-                - account_id
-              properties:
-                provider_id:
-                  type: string
-                account_id:
-                  type: string
+              $ref: "#/components/schemas/PayElectricityRequest"
       responses:
-        '200':
+        "200":
+          description: Payment successful
+
+  /electricity/history:
+    get:
+      tags: [Electricity]
+      summary: Electricity payment history
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/OffsetParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: History retrieved
+
+  /electricity/token/{transaction_id}:
+    get:
+      tags: [Electricity]
+      summary: Retrieve prepaid token
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TransactionIDParam"
+      responses:
+        "200":
+          description: Token retrieved
+
+  # ========== BETTING ==========
+  /betting/providers:
+    get:
+      tags: [Betting]
+      summary: List betting platforms
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Providers retrieved
+
+  /betting/validate-account:
+    post:
+      tags: [Betting]
+      summary: Validate betting account ID/username
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ValidateBettingAccountRequest"
+      responses:
+        "200":
           description: Account validated
-  
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BettingAccountResponse"
+
   /betting/fund:
     post:
       tags: [Betting]
@@ -659,23 +1509,29 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - provider_id
-                - account_id
-                - amount
-              properties:
-                provider_id:
-                  type: string
-                account_id:
-                  type: string
-                amount:
-                  type: integer
+              $ref: "#/components/schemas/FundBettingRequest"
       responses:
-        '200':
+        "200":
           description: Wallet funded
-  
-  # Savings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionResponse"
+
+  /betting/history:
+    get:
+      tags: [Betting]
+      summary: Betting transaction history
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/OffsetParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: History retrieved
+
+  # ========== SAVINGS ==========
   /savings/goals/create:
     post:
       tags: [Savings]
@@ -687,36 +1543,100 @@ paths:
         content:
           application/json:
             schema:
+              $ref: "#/components/schemas/CreateSavingsGoalRequest"
+      responses:
+        "200":
+          description: Goal created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SavingsGoalResponse"
+
+  /savings/goals/contribute:
+    post:
+      tags: [Savings]
+      summary: Contribute to goal
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContributeToGoalRequest"
+      responses:
+        "200":
+          description: Contribution added
+
+  /savings/goals:
+    get:
+      tags: [Savings]
+      summary: List all goals
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Goals retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SavingsGoalResponse"
+
+  /savings/goals/{id}:
+    get:
+      tags: [Savings]
+      summary: Get goal progress
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TransactionIDParam"
+      responses:
+        "200":
+          description: Goal retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SavingsGoalResponse"
+
+    put:
+      tags: [Savings]
+      summary: Update goal
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TransactionIDParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
               type: object
-              required:
-                - name
-                - target_amount
-                - duration_days
               properties:
                 name:
                   type: string
-                target_amount:
-                  type: integer
-                duration_days:
-                  type: integer
                 is_auto_debit:
                   type: boolean
                 auto_debit_amount:
                   type: integer
+                auto_debit_day:
+                  type: integer
       responses:
-        '200':
-          description: Goal created
-  
-  /savings/goals:
-    get:
+        "200":
+          description: Goal updated
+
+    delete:
       tags: [Savings]
-      summary: List all savings goals
+      summary: Delete goal (withdraw funds)
       security:
         - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TransactionIDParam"
       responses:
-        '200':
-          description: Goals retrieved
-  
+        "200":
+          description: Goal deleted
+
   /savings/roundup/activate:
     post:
       tags: [Savings]
@@ -728,38 +1648,172 @@ paths:
         content:
           application/json:
             schema:
+              $ref: "#/components/schemas/ActivateRoundupRequest"
+      responses:
+        "200":
+          description: Roundup activated
+
+  /savings/roundup/deactivate:
+    post:
+      tags: [Savings]
+      summary: Disable auto-roundup
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Roundup deactivated
+
+  /savings/roundup/status:
+    get:
+      tags: [Savings]
+      summary: Get roundup status
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Status retrieved
+
+  # ========== COMPLIANCE & SECURITY ==========
+  /compliance/report/suspicious:
+    post:
+      tags: [Compliance]
+      summary: Report suspicious transaction
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReportSuspiciousRequest"
+      responses:
+        "200":
+          description: Report submitted
+
+  /compliance/limits/check:
+    get:
+      tags: [Compliance]
+      summary: Check transaction limits
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: transaction_type
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: amount
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Limit check result
+
+  /security/sim-swap/check:
+    post:
+      tags: [Compliance]
+      summary: Verify SIM change
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone_number:
+                  type: string
+      responses:
+        "200":
+          description: SIM swap status
+
+  /security/device/trust:
+    post:
+      tags: [Compliance]
+      summary: Register trusted device
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
               type: object
               required:
-                - goal_id
-                - multiplier
+                - device_id
+                - device_name
+                - device_type
               properties:
-                goal_id:
+                device_id:
                   type: string
-                multiplier:
-                  type: integer
-                max_daily_amount:
-                  type: integer
+                device_name:
+                  type: string
+                device_type:
+                  type: string
+                  enum: [ios, android, web]
       responses:
-        '200':
-          description: Roundup activated
-  
-  # Admin Routes
-  /admin/users:
-    get:
-      tags: [Admin]
-      summary: List all users
-      security:
-        - AdminAuth: []
-      responses:
-        '200':
-          description: Users retrieved
-  
-  /admin/users/{id}/suspend:
+        "200":
+          description: Device trusted
+
+  /security/2fa/enable:
     post:
-      tags: [Admin]
-      summary: Suspend a user
+      tags: [Compliance]
+      summary: Enable 2FA
       security:
-        - AdminAuth: []
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+      responses:
+        "200":
+          description: 2FA enabled
+
+  /security/2fa/verify:
+    post:
+      tags: [Compliance]
+      summary: Verify 2FA
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - code
+              properties:
+                code:
+                  type: string
+      responses:
+        "200":
+          description: 2FA verified
+
+  /security/sessions:
+    get:
+      tags: [Compliance]
+      summary: List active sessions
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Sessions retrieved
+
+  /security/sessions/{id}:
+    delete:
+      tags: [Compliance]
+      summary: Terminate session
+      security:
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -767,13 +1821,349 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
+          description: Session terminated
+
+  # ========== NOTIFICATIONS ==========
+  /notifications/in-app:
+    get:
+      tags: [Notifications]
+      summary: Get in-app notifications
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/OffsetParam"
+        - $ref: "#/components/parameters/LimitParam"
+        - name: unread_only
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Notifications retrieved
+
+  /notifications/{id}/read:
+    put:
+      tags: [Notifications]
+      summary: Mark notification as read
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TransactionIDParam"
+      responses:
+        "200":
+          description: Notification marked as read
+
+  # ========== SUPPORT ==========
+  /support/tickets/create:
+    post:
+      tags: [Support]
+      summary: Create support ticket
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTicketRequest"
+      responses:
+        "200":
+          description: Ticket created
+
+  /support/tickets:
+    get:
+      tags: [Support]
+      summary: List user tickets
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/OffsetParam"
+        - $ref: "#/components/parameters/LimitParam"
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Tickets retrieved
+
+  /support/tickets/{id}:
+    get:
+      tags: [Support]
+      summary: Get ticket details
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TransactionIDParam"
+      responses:
+        "200":
+          description: Ticket details retrieved
+
+  /support/tickets/{id}/reply:
+    post:
+      tags: [Support]
+      summary: Reply to ticket
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TransactionIDParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - message
+              properties:
+                message:
+                  type: string
+                attachment_url:
+                  type: string
+      responses:
+        "200":
+          description: Reply added
+
+  /support/tickets/{id}/status:
+    put:
+      tags: [Support]
+      summary: Update ticket status
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TransactionIDParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [open, in_progress, resolved, closed]
+                note:
+                  type: string
+      responses:
+        "200":
+          description: Status updated
+
+  # ========== ADMIN - USER MANAGEMENT ==========
+  /admin/users:
+    get:
+      tags: [Admin Users]
+      summary: List all users
+      security:
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/LimitParam"
+        - name: tier
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, suspended]
+        - name: from_date
+          in: query
+          schema:
+            type: string
+        - name: to_date
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Users retrieved
+    /admin/users/{id}:
+      get:
+        tags: [Admin Users]
+        summary: Get user details
+        security:
+          - AdminAuth: []
+        parameters:
+          - $ref: "#/components/parameters/TransactionIDParam"
+        responses:
+          "200":
+            description: User details retrieved
+      delete:
+        tags: [Admin Users]
+        summary: Soft-delete user
+        security:
+          - AdminAuth: []
+        parameters:
+          - $ref: "#/components/parameters/TransactionIDParam"
+        responses:
+          "200":
+            description: User deleted
+
+  /admin/users/{id}/tier/upgrade:
+    post:
+      tags: [Admin Users]
+      summary: Upgrade user tier
+      security:
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TransactionIDParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - tier
+              properties:
+                tier:
+                  type: integer
+                  minimum: 0
+                  maximum: 3
+                reason:
+                  type: string
+      responses:
+        "200":
+          description: Tier upgraded
+
+  /admin/users/{id}/suspend:
+    post:
+      tags: [Admin Users]
+      summary: Suspend user
+      security:
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TransactionIDParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reason
+              properties:
+                reason:
+                  type: string
+                duration:
+                  type: string
+      responses:
+        "200":
           description: User suspended
-  
+
+  /admin/users/{id}/unsuspend:
+    post:
+      tags: [Admin Users]
+      summary: Unsuspend user
+      security:
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TransactionIDParam"
+      responses:
+        "200":
+          description: User unsuspended
+
+  /admin/users/{id}/limits:
+    put:
+      tags: [Admin Users]
+      summary: Override user limits
+      security:
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TransactionIDParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                daily_limit:
+                  type: integer
+                weekly_limit:
+                  type: integer
+                monthly_limit:
+                  type: integer
+                single_tx_limit:
+                  type: integer
+                reason:
+                  type: string
+      responses:
+        "200":
+          description: Limits overridden
+
+  /admin/users/search:
+    get:
+      tags: [Admin Users]
+      summary: Search users
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: Search results
+
+  # ========== ADMIN - TRANSACTION MANAGEMENT ==========
+  /admin/transactions:
+    get:
+      tags: [Admin Transactions]
+      summary: List all transactions
+      security:
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/LimitParam"
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: from_date
+          in: query
+          schema:
+            type: string
+        - name: to_date
+          in: query
+          schema:
+            type: string
+        - name: user_id
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Transactions retrieved
+
+  /admin/transactions/{id}:
+    get:
+      tags: [Admin Transactions]
+      summary: Get transaction details
+      security:
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TransactionIDParam"
+      responses:
+        "200":
+          description: Transaction details retrieved
+
   /admin/transactions/reverse:
     post:
-      tags: [Admin]
-      summary: Reverse a transaction
+      tags: [Admin Transactions]
+      summary: Reverse transaction
       security:
         - AdminAuth: []
       requestBody:
@@ -793,13 +2183,293 @@ paths:
                 notify_user:
                   type: boolean
       responses:
-        '200':
+        "200":
           description: Transaction reversed
-  
+
+  /admin/transactions/void:
+    post:
+      tags: [Admin Transactions]
+      summary: Void pending transaction
+      security:
+        - AdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - transaction_id
+                - reason
+              properties:
+                transaction_id:
+                  type: string
+                reason:
+                  type: string
+      responses:
+        "200":
+          description: Transaction voided
+
+  /admin/transactions/summary:
+    get:
+      tags: [Admin Transactions]
+      summary: Daily/weekly/monthly summary
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: start_date
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: end_date
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Summary retrieved
+
+  # ========== ADMIN - WALLET MANAGEMENT ==========
+  /admin/wallets:
+    get:
+      tags: [Admin Wallets]
+      summary: List all wallets
+      security:
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/LimitParam"
+        - name: is_locked
+          in: query
+          schema:
+            type: boolean
+        - name: currency
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Wallets retrieved
+
+  /admin/wallets/{id}:
+    get:
+      tags: [Admin Wallets]
+      summary: Get wallet details
+      security:
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TransactionIDParam"
+      responses:
+        "200":
+          description: Wallet details retrieved
+
+  /admin/wallets/credit:
+    post:
+      tags: [Admin Wallets]
+      summary: Manual credit
+      security:
+        - AdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user_id
+                - amount
+                - description
+                - reference
+              properties:
+                user_id:
+                  type: string
+                amount:
+                  type: integer
+                description:
+                  type: string
+                reference:
+                  type: string
+      responses:
+        "200":
+          description: Wallet credited
+
+  /admin/wallets/debit:
+    post:
+      tags: [Admin Wallets]
+      summary: Manual debit
+      security:
+        - AdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user_id
+                - amount
+                - description
+                - reference
+              properties:
+                user_id:
+                  type: string
+                amount:
+                  type: integer
+                description:
+                  type: string
+                reference:
+                  type: string
+      responses:
+        "200":
+          description: Wallet debited
+
+  /admin/wallets/freeze:
+    post:
+      tags: [Admin Wallets]
+      summary: Freeze wallet
+      security:
+        - AdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user_id
+                - reason
+              properties:
+                user_id:
+                  type: string
+                reason:
+                  type: string
+      responses:
+        "200":
+          description: Wallet frozen
+
+  /admin/wallets/unfreeze:
+    post:
+      tags: [Admin Wallets]
+      summary: Unfreeze wallet
+      security:
+        - AdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user_id
+              properties:
+                user_id:
+                  type: string
+      responses:
+        "200":
+          description: Wallet unfrozen
+
+  /admin/wallets/balances/summary:
+    get:
+      tags: [Admin Wallets]
+      summary: Total balance summary
+      security:
+        - AdminAuth: []
+      responses:
+        "200":
+          description: Balance summary retrieved
+
+  # ========== ADMIN - KYC MANAGEMENT ==========
+  /admin/kyc/pending:
+    get:
+      tags: [Admin KYC]
+      summary: List pending KYC
+      security:
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: Pending KYC list retrieved
+
+  /admin/kyc/{id}:
+    get:
+      tags: [Admin KYC]
+      summary: Get KYC details
+      security:
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TransactionIDParam"
+      responses:
+        "200":
+          description: KYC details retrieved
+
+  /admin/kyc/{id}/approve:
+    post:
+      tags: [Admin KYC]
+      summary: Approve KYC
+      security:
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TransactionIDParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                notes:
+                  type: string
+      responses:
+        "200":
+          description: KYC approved
+
+  /admin/kyc/{id}/reject:
+    post:
+      tags: [Admin KYC]
+      summary: Reject KYC
+      security:
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TransactionIDParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reason
+              properties:
+                reason:
+                  type: string
+      responses:
+        "200":
+          description: KYC rejected
+
+  # ========== ADMIN - PROVIDER MANAGEMENT ==========
+  /admin/providers:
+    get:
+      tags: [Admin Providers]
+      summary: List all providers
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Providers retrieved
+
   /admin/providers/{id}/toggle:
     put:
-      tags: [Admin]
-      summary: Enable/disable a provider
+      tags: [Admin Providers]
+      summary: Enable/disable provider
       security:
         - AdminAuth: []
       parameters:
@@ -818,15 +2488,467 @@ paths:
                 is_active:
                   type: boolean
       responses:
-        '200':
+        "200":
           description: Provider toggled
-  
+
+  /admin/providers/{id}/priority:
+    put:
+      tags: [Admin Providers]
+      summary: Set provider priority
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - priority
+              properties:
+                priority:
+                  type: integer
+      responses:
+        "200":
+          description: Priority updated
+
+  /admin/providers/{id}/health:
+    get:
+      tags: [Admin Providers]
+      summary: Check provider API health
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Health status retrieved
+
+  /admin/providers/logs:
+    get:
+      tags: [Admin Providers]
+      summary: View provider API logs
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: provider_id
+          in: query
+          schema:
+            type: string
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: Logs retrieved
+
+  # ========== ADMIN - REPORTS ==========
+  /admin/reports/daily:
+    get:
+      tags: [Admin Reports]
+      summary: Daily financial report
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: date
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Report generated
+
+  /admin/reports/monthly:
+    get:
+      tags: [Admin Reports]
+      summary: Monthly financial report
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: year
+          in: query
+          schema:
+            type: integer
+        - name: month
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Report generated
+
+  /admin/reports/revenue/by-bill-type:
+    get:
+      tags: [Admin Reports]
+      summary: Revenue by bill type
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: start_date
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: end_date
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Revenue data retrieved
+
+  /admin/reports/top-users:
+    get:
+      tags: [Admin Reports]
+      summary: Top users by volume
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Top users retrieved
+
+  /admin/reports/fraud-attempts:
+    get:
+      tags: [Admin Reports]
+      summary: Fraud statistics
+      security:
+        - AdminAuth: []
+      responses:
+        "200":
+          description: Fraud stats retrieved
+
+  /admin/reports/provider-performance:
+    get:
+      tags: [Admin Reports]
+      summary: Provider success/failure rates
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: start_date
+          in: query
+          schema:
+            type: string
+        - name: end_date
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Performance data retrieved
+
+  /admin/reports/export:
+    post:
+      tags: [Admin Reports]
+      summary: Export report
+      security:
+        - AdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - report_type
+                - format
+              properties:
+                report_type:
+                  type: string
+                format:
+                  type: string
+                  enum: [csv, excel, pdf]
+                start_date:
+                  type: string
+                end_date:
+                  type: string
+      responses:
+        "200":
+          description: Report exported
+
+  # ========== ADMIN - SYSTEM SETTINGS ==========
   /admin/settings:
     get:
-      tags: [Admin]
+      tags: [Admin Settings]
       summary: Get system settings
       security:
         - AdminAuth: []
       responses:
-        '200':
+        "200":
           description: Settings retrieved
+
+    put:
+      tags: [Admin Settings]
+      summary: Update system settings
+      security:
+        - AdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                maintenance_mode:
+                  type: boolean
+                maintenance_message:
+                  type: string
+                global_daily_limit:
+                  type: integer
+                global_single_tx_limit:
+                  type: integer
+      responses:
+        "200":
+          description: Settings updated
+
+  /admin/settings/health:
+    get:
+      tags: [Admin Settings]
+      summary: System health check
+      security:
+        - AdminAuth: []
+      responses:
+        "200":
+          description: Health status retrieved
+
+  /admin/settings/audit-logs:
+    get:
+      tags: [Admin Settings]
+      summary: List admin actions
+      security:
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/LimitParam"
+        - name: admin_id
+          in: query
+          schema:
+            type: string
+        - name: action
+          in: query
+          schema:
+            type: string
+        - name: from_date
+          in: query
+          schema:
+            type: string
+        - name: to_date
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Audit logs retrieved
+
+  /admin/settings/audit-logs/{id}:
+    get:
+      tags: [Admin Settings]
+      summary: Get audit log details
+      security:
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TransactionIDParam"
+      responses:
+        "200":
+          description: Audit log retrieved
+
+  /admin/settings/backup/database:
+    post:
+      tags: [Admin Settings]
+      summary: Trigger DB backup
+      security:
+        - AdminAuth: []
+      responses:
+        "200":
+          description: Backup triggered
+
+  /admin/settings/metrics:
+    get:
+      tags: [Admin Settings]
+      summary: System performance metrics
+      security:
+        - AdminAuth: []
+      responses:
+        "200":
+          description: Metrics retrieved
+
+  # ========== ADMIN - ROLE MANAGEMENT ==========
+  /admin/roles:
+    get:
+      tags: [Admin Roles]
+      summary: List roles
+      security:
+        - AdminAuth: []
+      responses:
+        "200":
+          description: Roles retrieved
+
+    post:
+      tags: [Admin Roles]
+      summary: Create role
+      security:
+        - AdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - permissions
+              properties:
+                name:
+                  type: string
+                permissions:
+                  type: array
+                  items:
+                    type: string
+                description:
+                  type: string
+      responses:
+        "200":
+          description: Role created
+
+  /admin/roles/{id}:
+    delete:
+      tags: [Admin Roles]
+      summary: Delete role
+      security:
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TransactionIDParam"
+      responses:
+        "200":
+          description: Role deleted
+
+    put:
+      tags: [Admin Roles]
+      summary: Update role
+      security:
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TransactionIDParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                permissions:
+                  type: array
+                  items:
+                    type: string
+                description:
+                  type: string
+      responses:
+        "200":
+          description: Role updated
+
+  /admin/roles/staff:
+    get:
+      tags: [Admin Roles]
+      summary: List staff
+      security:
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: Staff list retrieved
+
+  /admin/roles/staff/invite:
+    post:
+      tags: [Admin Roles]
+      summary: Invite staff
+      security:
+        - AdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - full_name
+                - role
+              properties:
+                email:
+                  type: string
+                full_name:
+                  type: string
+                role:
+                  type: string
+      responses:
+        "200":
+          description: Invitation sent
+
+  /admin/roles/staff/{id}/role:
+    put:
+      tags: [Admin Roles]
+      summary: Assign role to staff
+      security:
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TransactionIDParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - role
+              properties:
+                role:
+                  type: string
+      responses:
+        "200":
+          description: Role assigned
+
+  /admin/roles/staff/{id}:
+    delete:
+      tags: [Admin Roles]
+      summary: Remove staff
+      security:
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TransactionIDParam"
+      responses:
+        "200":
+          description: Staff removed
+
+  /admin/roles/staff/{id}/audit:
+    get:
+      tags: [Admin Roles]
+      summary: Get staff audit trail
+      security:
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TransactionIDParam"
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: Audit trail retrieved
