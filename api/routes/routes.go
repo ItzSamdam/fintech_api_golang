@@ -124,6 +124,9 @@ func SetupRoutes(app *fiber.App, db *gorm.DB, rdb *redisLib.Client, logger *zap.
         })
     })
 
+    // In SetupRoutes function, add:
+    app.Static("/docs", "./api/docs")
+
     app.Get("/swagger", func(c *fiber.Ctx) error {
         c.Set("Content-Security-Policy", "")
         c.Set("X-Content-Type-Options", "")
@@ -141,7 +144,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB, rdb *redisLib.Client, logger *zap.
         <script>
             window.onload = function() {
                 SwaggerUIBundle({
-                    url: "/api/docs/swagger.yaml",
+                    url: "/docs/swagger.yaml",
                     dom_id: '#swagger-ui',
                     presets: [SwaggerUIBundle.presets.apis],
                     layout: "BaseLayout",

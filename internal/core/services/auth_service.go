@@ -533,11 +533,17 @@ func (s *AuthService) generateToken(user *entities.User, tokenType string) (stri
     return token.SignedString([]byte(s.config.JWT.Secret))
 }
 
+// func generateOTP() string {
+//     // Generate 6-digit OTP
+//     b := make([]byte, 3)
+//     rand.Read(b)
+//     return fmt.Sprintf("%06d", int(b[0])<<16|int(b[1])<<8|int(b[2])%1000000)
+// }
 func generateOTP() string {
-    // Generate 6-digit OTP
     b := make([]byte, 3)
-    rand.Read(b)
-    return fmt.Sprintf("%06d", int(b[0])<<16|int(b[1])<<8|int(b[2])%1000000)
+    _, _ = rand.Read(b) // always check error in production
+    n := (int(b[0]) << 16) | (int(b[1]) << 8) | int(b[2])
+    return fmt.Sprintf("%06d", n % 1000000)
 }
 
 func timeNow() *time.Time {

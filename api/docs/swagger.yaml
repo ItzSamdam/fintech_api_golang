@@ -24,6 +24,10 @@ tags:
     description: Wallet operations and balance management
   - name: Transfers
     description: Bank and wallet transfers
+  - name: Transactions
+    description: All transactions
+  - name: Bills
+    description: All transactions
   - name: Airtime
     description: Airtime purchases
   - name: Data
@@ -58,6 +62,8 @@ tags:
     description: System settings
   - name: Admin Roles
     description: Role and permission management
+  - name: Admin Fees
+    description: Fees and additional charges
 
 components:
   securitySchemes:
@@ -1282,6 +1288,85 @@ paths:
               schema:
                 $ref: "#/components/schemas/TransactionHistoryResponse"
 
+  /bills/history:
+    get:
+      tags:
+        - Bills
+      summary: Get aggregated bill payment history
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: bill_type
+          in: query
+          schema:
+            type: string
+            enum: [airtime, data, electricity, betting]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Bill history retrieved
+
+  /transactions:
+    get:
+      tags:
+        - Transactions
+      summary: Get all user transactions
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [transfer, airtime, data, electricity, betting, savings]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Transactions retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionHistoryResponse"
+
+  /transactions/{id}:
+    get:
+      tags:
+        - Transactions
+      summary: Get specific transaction details
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Transaction details retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionHistoryResponse"
+
   # ========== AIRTIME ==========
   /airtime/networks:
     get:
@@ -1293,15 +1378,15 @@ paths:
         "200":
           description: Networks retrieved
 
-  /airtime/denominations:
-    get:
-      tags: [Airtime]
-      summary: Get available airtime amounts
-      security:
-        - BearerAuth: []
-      responses:
-        "200":
-          description: Denominations retrieved
+  # /airtime/denominations:
+  #   get:
+  #     tags: [Airtime]
+  #     summary: Get available airtime amounts
+  #     security:
+  #       - BearerAuth: []
+  #     responses:
+  #       "200":
+  #         description: Denominations retrieved
 
   /airtime/purchase:
     post:
@@ -2969,3 +3054,91 @@ paths:
       responses:
         "200":
           description: Audit trail retrieved
+
+  /admin/fees:
+    get:
+      tags:
+        - Admin Fees
+      summary: List all fees for all bill types
+      security:
+        - AdminAuth: []
+      responses:
+        '200':
+          description: Fees retrieved
+
+  /admin/fees/{bill_type}:
+    put:
+      tags:
+        - Admin Fees
+      summary: Update fee for a bill type
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: bill_type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [transfer, airtime, data, electricity, betting]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fee_type:
+                  type: string
+                  enum: [percentage, fixed]
+                fee_value:
+                  type: number
+                cap_amount:
+                  type: integer
+                min_amount:
+                  type: integer
+                max_amount:
+                  type: integer
+      responses:
+        '200':
+          description: Fee updated
+
+  /admin/fees/margins:
+    get:
+      tags:
+        - Admin Fees
+      summary: Get profit margins per provider
+      security:
+        - AdminAuth: []
+      responses:
+        '200':
+          description: Margins retrieved
+
+  /admin/fees/margins/{provider_id}:
+    put:
+      tags:
+        - Admin Fees
+      summary: Update provider margin
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: provider_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - margin_percent
+              properties:
+                margin_percent:
+                  type: number
+                  minimum: 0
+                  maximum: 100
+      responses:
+        '200':
+          description: Margin updated
