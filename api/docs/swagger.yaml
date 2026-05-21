@@ -803,6 +803,23 @@ security:
   - BearerAuth: []
 
 paths:
+  # ========== DOCUMENTATION ==========
+  /:
+    get:
+      tags: [Server Check]
+      summary: Get server status
+      responses:
+        "200":
+          description: Server is healthy
+
+  /swagger:
+    get:
+      tags: [Documentation]
+      summary: Swagger UI
+      responses:
+        "200":
+          description: Swagger UI is healthy
+
   # ========== HEALTH ==========
   /health:
     get:

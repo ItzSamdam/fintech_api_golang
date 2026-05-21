@@ -124,11 +124,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB, rdb *redisLib.Client, logger *zap.
         })
     })
 
-    // In SetupRoutes function, add:
-    // Add this route to serve Swagger UI
-    // Swagger UI route - add this BEFORE the SecurityHeaders middleware
     app.Get("/swagger", func(c *fiber.Ctx) error {
-        // Remove restrictive headers for Swagger
         c.Set("Content-Security-Policy", "")
         c.Set("X-Content-Type-Options", "")
         c.Set("X-Frame-Options", "")
@@ -145,7 +141,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB, rdb *redisLib.Client, logger *zap.
         <script>
             window.onload = function() {
                 SwaggerUIBundle({
-                    url: "/docs/swagger.yaml",
+                    url: "/api/docs/swagger.yaml",
                     dom_id: '#swagger-ui',
                     presets: [SwaggerUIBundle.presets.apis],
                     layout: "BaseLayout",
