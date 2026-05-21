@@ -116,9 +116,13 @@ Run migrations:
 ```bash
 ./scripts/migrate-up.sh
 ```
-Start the API:
+Install Air for live reloading:
 ```bash
-go run cmd/api/main.go
+go install github.com/air-verse/air@latest
+```
+Start the API with Air:
+```bash
+air
 ```
 ## 🧪 Testing
 - Unit tests: go test ./tests/unit/...
@@ -127,8 +131,8 @@ go run cmd/api/main.go
 - End-to-end tests: go test ./tests/e2e/...
 
 ## 📖 Documentation
-- Swagger: api/docs/swagger.yaml
-- Postman collection: api/docs/postman_collection.json
+- Swagger: http://localhost:[port]/swagger
+- Postman collection: api/docs/postman_collection.json (not updated)
 
 ## 📜 License
 This project is licensed under the MIT License.
