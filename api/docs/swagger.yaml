@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Fintech API
+  title: Fintech API GOLANG
   description: Production-grade fintech API for payments, transfers, bills, and savings
   version: 1.0.0
   contact:
