@@ -43,17 +43,23 @@ func SetupRoutes(app *fiber.App, db *gorm.DB, rdb *redisLib.Client, logger *zap.
     cacheRepo := redis.NewCacheRepository(rdb)
     _ = cacheRepo // Use as needed
     
-    // Provider Clients
+    // ========== INITIALIZE PROVIDER CLIENTS ==========
     redBiller := providers.NewRedBillerClient(
         cfg.ExternalAPIs.NIPBaseURL,
         cfg.ExternalAPIs.NIPAPIKey,
     )
-    providerRegistry := providers.NewProviderRegistry(redBiller)
+    
+    // Initialize SMS Service
+    termiiClient := providers.NewTermiiClient(cfg.SMS.TermiiAPIKey)
+    smsService := providers.NewSMSService(termiiClient)
+    
+    // Create Provider Registry
+    providerRegistry := providers.NewProviderRegistry(redBiller, smsService)
     _ = providerRegistry
     
     // ========== INITIALIZE SERVICES ==========
     authService := services.NewAuthService(
-        userRepo, kycRepo, sessionRepo, otpRepo, walletRepo, cfg,
+        userRepo, kycRepo, sessionRepo, otpRepo, walletRepo, smsService, cfg,
     )
     
     walletService := services.NewWalletService(
@@ -173,8 +179,9 @@ func SetupRoutes(app *fiber.App, db *gorm.DB, rdb *redisLib.Client, logger *zap.
     auth := v1.Group("/auth")
     {
         auth.Post("/register/phone", authHandler.RegisterPhone)
+        auth.Post("/send-otp", authHandler.SendOTP)
         auth.Post("/verify/otp", authHandler.VerifyOTP)
-        auth.Post("/register/bvn", authHandler.RegisterBVN)
+        auth.Post("/verify/basic", authHandler.RegisterBVN)
         auth.Post("/verify/face", authHandler.VerifyFace)
         auth.Post("/login", authHandler.Login)
         auth.Post("/reset-password", authHandler.ResetPassword)

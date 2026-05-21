@@ -44,6 +44,31 @@ func (h *AuthHandler) RegisterPhone(c *fiber.Ctx) error {
     })
 }
 
+// SendOTP - POST /auth/SendOTP
+func (h *AuthHandler) SendOTP(c *fiber.Ctx) error {
+    var req request.SendOTPRequest
+    if err := c.BodyParser(&req); err != nil {
+        return c.Status(fiber.StatusBadRequest).JSON(response.ErrorResponse{
+            Error:   "Validation Error",
+            Message: "Invalid request body",
+        })
+    }
+    
+    resp, err := h.authService.SendOTP(c.Context(), &req)
+    if err != nil {
+        return c.Status(fiber.StatusBadRequest).JSON(response.ErrorResponse{
+            Error:   "Unable to send OTP at the moment",
+            Message: err.Error(),
+        })
+    }
+    
+    return c.Status(fiber.StatusOK).JSON(response.SuccessResponse{
+        Success: true,
+        Message: "OTP sent successfully",
+        Data:    resp,
+    })
+}
+
 // VerifyOTP - POST /auth/verify/otp
 func (h *AuthHandler) VerifyOTP(c *fiber.Ctx) error {
     var req request.VerifyOTPRequest
