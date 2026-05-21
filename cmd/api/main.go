@@ -4,6 +4,7 @@ import (
     "log"
     "fintech_api_golang/internal/config"
     "fintech_api_golang/internal/pkg/db"
+    "fintech_api_golang/internal/server"
 )
 
 func main() {
@@ -27,7 +28,10 @@ func main() {
     }
     
     // Initialize Redis (if needed)
-    redisClient := db.InitRedis(&cfg.Redis)
+    redisClient, err := db.InitRedis(&cfg.Redis)
+    if err != nil {
+        log.Fatalf("Failed to initialize Redis: %v", err)
+    }
     
     // Close connections on shutdown
     defer func() {
