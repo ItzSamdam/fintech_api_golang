@@ -4,6 +4,11 @@ type RegisterPhoneRequest struct {
     PhoneNumber string `json:"phone_number" validate:"required,len=11,numeric"`
 }
 
+type SendOTPRequest struct {
+    PhoneNumber string `json:"phone_number" validate:"required,len=11,numeric"`
+    Purpose     string `json:"purpose" validate:"required"`
+}
+
 type VerifyOTPRequest struct {
     PhoneNumber string `json:"phone_number" validate:"required,len=11,numeric"`
     Code        string `json:"code" validate:"required,len=6,numeric"`

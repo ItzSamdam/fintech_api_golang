@@ -87,6 +87,20 @@ components:
           pattern: "^[0-9]{11}$"
           example: "08012345678"
 
+    SendOTPRequest:
+      type: object
+      required:
+        - phone_number
+        - purpose
+      properties:
+        phone_number:
+          type: string
+          pattern: "^[0-9]{11}$"
+          example: "08012345678"
+        code:
+          type: string
+          example: "registration"
+
     VerifyOTPRequest:
       type: object
       required:
@@ -846,6 +860,24 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/RegisterPhoneRequest"
+      responses:
+        "200":
+          description: OTP sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /auth/send-otp:
+    post:
+      tags: [Authentication]
+      summary: Send OTP for authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendOTPRequest"
       responses:
         "200":
           description: OTP sent successfully

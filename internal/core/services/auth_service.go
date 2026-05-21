@@ -16,6 +16,7 @@ import (
     "fintech_api_golang/internal/core/interfaces"
     "fintech_api_golang/internal/dto/request"
     "fintech_api_golang/internal/dto/response"
+    "fintech_api_golang/internal/repositories/providers"
 )
 
 type AuthService struct {
@@ -24,6 +25,7 @@ type AuthService struct {
     sessionRepo   interfaces.SessionRepository
     otpRepo       interfaces.OTPRepository
     walletRepo    interfaces.WalletRepository
+    smsService    *providers.SMSService  // Add this
     config        *config.Config
 }
 
@@ -33,6 +35,7 @@ func NewAuthService(
     sessionRepo interfaces.SessionRepository,
     otpRepo interfaces.OTPRepository,
     walletRepo interfaces.WalletRepository,
+    smsService *providers.SMSService,
     cfg *config.Config,
 ) *AuthService {
     return &AuthService{
@@ -41,6 +44,7 @@ func NewAuthService(
         sessionRepo: sessionRepo,
         otpRepo:     otpRepo,
         walletRepo:  walletRepo,
+        smsService:  smsService,
         config:      cfg,
     }
 }
@@ -52,19 +56,43 @@ func (s *AuthService) RegisterPhone(ctx context.Context, req *request.RegisterPh
         return nil, err
     }
     
-    if existingUser != nil {
+    // If user exists and is active, return error
+    if existingUser != nil && existingUser.IsActive {
         return nil, errors.New("user already exists with this phone number")
     }
     
-    // Generate OTP
+    // If user exists but not active, just send OTP (don't create new user)
+    if existingUser == nil {
+        // Create new inactive user
+        user := &entities.User{
+            ID:          uuid.New(),
+            PhoneNumber: req.PhoneNumber,
+            IsActive:    false,
+            Tier:        0,
+        }
+        if err := s.userRepo.Create(ctx, user); err != nil {
+            return nil, err
+        }
+    }
+    
+    // Send OTP using reusable function
+    return s.SendOTP(ctx, req.PhoneNumber, "registration")
+}
+
+// SendOTP - Reusable function to send OTP for any purpose
+func (s *AuthService) SendOTP(ctx context.Context, phoneNumber, purpose string) (*response.OTPResponse, error) {
+    // Invalidate old OTPs for this phone number and purpose
+    s.otpRepo.InvalidateByPhoneNumber(ctx, phoneNumber, purpose)
+    
+    // Generate new OTP
     otpCode := generateOTP()
     
     // Create OTP record
     otp := &entities.OTP{
         ID:          uuid.New(),
-        PhoneNumber: req.PhoneNumber,
+        PhoneNumber: phoneNumber,
         Code:        otpCode,
-        Purpose:     "registration",
+        Purpose:     purpose,
         ExpiresAt:   time.Now().Add(10 * time.Minute),
     }
     
@@ -72,12 +100,14 @@ func (s *AuthService) RegisterPhone(ctx context.Context, req *request.RegisterPh
         return nil, err
     }
     
-    // TODO: Send SMS via notification service
-    // For now, just return the OTP in response (remove in production)
+    // Send SMS
+    if s.smsService != nil {
+        s.smsService.SendAsync(phoneNumber, otpCode, "", 10)
+    }
     
     return &response.OTPResponse{
         Reference: otp.ID.String(),
-        ExpiresIn: 600, // 10 minutes in seconds
+        ExpiresIn: 600,
     }, nil
 }
 

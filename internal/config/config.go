@@ -14,38 +14,27 @@ type Config struct {
     Port         string
     Environment  string
     Debug        bool
-    
     // Database
     Database     DatabaseConfig
-    
     // Redis
     Redis        RedisConfig
-    
     // JWT
     JWT          JWTConfig
-    
     // Encryption
     Encryption   EncryptionConfig
-    
     // External APIs
     ExternalAPIs ExternalAPIConfig
-    
     // Rate Limiting
     RateLimit    RateLimitConfig
-    
     // Queue (RabbitMQ)
     Queue        QueueConfig
-    
     // Email/SMS
     SMTP         SMTPConfig
     SMS          SMSConfig
-    
     // Cloud Storage
     Cloudinary   CloudinaryConfig
-    
     // Webhook
     Webhook      WebhookConfig
-    
     // Face Recognition
     FaceRecognition FaceRecognitionConfig
 }
@@ -78,8 +67,6 @@ type JWTConfig struct {
 }
 
 type EncryptionConfig struct {
-    BVNKey    string
-    NINKey    string
     AESKey    string
 }
 
@@ -87,20 +74,10 @@ type ExternalAPIConfig struct {
     // Bank APIs (NIP)
     NIPBaseURL      string
     NIPAPIKey       string
-    NIPSecret       string
-    
-    // BVN Validation
-    BVNBaseURL      string
-    BVNAPIKey       string
-    
+    NIPHook			string
     // Face Recognition
     FaceBaseURL     string
     FaceAPIKey      string
-    
-    // SMS
-    SMSBaseURL      string
-    SMSAPIKey       string
-    SMSSenderID     string
 }
 
 type RateLimitConfig struct {
@@ -123,10 +100,7 @@ type SMTPConfig struct {
 }
 
 type SMSConfig struct {
-    Provider   string
-    APIKey     string
-    Secret     string
-    SenderID   string
+    TermiiAPIKey     string
 }
 
 type CloudinaryConfig struct {
@@ -185,22 +159,15 @@ func Load() *Config {
         },
         
         Encryption: EncryptionConfig{
-            BVNKey: getEnv("BVN_ENCRYPTION_KEY", "32-byte-key-for-bvn-encryption!!"),
-            NINKey: getEnv("NIN_ENCRYPTION_KEY", "32-byte-key-for-nin-encryption!!"),
             AESKey: getEnv("AES_ENCRYPTION_KEY", "32-byte-key-for-aes-encryption!!"),
         },
         
         ExternalAPIs: ExternalAPIConfig{
             NIPBaseURL:  getEnv("NIP_BASE_URL", "https://api.nip.com.ng/v1"),
             NIPAPIKey:   getEnv("NIP_API_KEY", ""),
-            NIPSecret:   getEnv("NIP_SECRET", ""),
-            BVNBaseURL:  getEnv("BVN_BASE_URL", "https://api.bvn.com.ng/v1"),
-            BVNAPIKey:   getEnv("BVN_API_KEY", ""),
+            NIPHook:     getEnv("NIP_API_HOOK", ""),
             FaceBaseURL: getEnv("FACE_BASE_URL", "https://api.face.com/v1"),
             FaceAPIKey:  getEnv("FACE_API_KEY", ""),
-            SMSBaseURL:  getEnv("SMS_BASE_URL", "https://api.sms.com.ng/v1"),
-            SMSAPIKey:   getEnv("SMS_API_KEY", ""),
-            SMSSenderID: getEnv("SMS_SENDER_ID", "FintechApp"),
         },
         
         RateLimit: RateLimitConfig{
@@ -223,10 +190,7 @@ func Load() *Config {
         },
         
         SMS: SMSConfig{
-            Provider: getEnv("SMS_PROVIDER", "termii"),
-            APIKey:   getEnv("SMS_API_KEY", ""),
-            Secret:   getEnv("SMS_SECRET", ""),
-            SenderID: getEnv("SMS_SENDER_ID", "FintechApp"),
+            TermiiAPIKey:   getEnv("TERMII_API_KEY", ""),
         },
         
         Cloudinary: CloudinaryConfig{

@@ -508,17 +508,250 @@ func (c *RedBillerClient) VerifyBVN(ctx context.Context, bvn, reference string) 
     })
 }
 
+
+// ========== SMS PROVIDER (TERMII) ==========
+
+type TermiiClient struct {
+    apiKey  string
+    baseURL string
+    httpClient *http.Client
+}
+
+type TermiiSMSRequest struct {
+    ApiKey  string `json:"api_key"`
+    To      string `json:"to"`
+    From    string `json:"from"`
+    Sms     string `json:"sms"`
+    Type    string `json:"type"`
+    Channel string `json:"channel"`
+    Media   interface{} `json:"media,omitempty"`
+}
+
+type TermiiSMSResponse struct {
+    MessageId string `json:"message_id"`
+    Message   string `json:"message"`
+    Balance   string `json:"balance"`
+    User      string `json:"user"`
+}
+
+func NewTermiiClient(apiKey string) *TermiiClient {
+    return &TermiiClient{
+        apiKey:     apiKey,
+        baseURL:    "https://api.ng.termii.com/api",
+        httpClient: &http.Client{
+            Timeout: 30 * time.Second,
+        },
+    }
+}
+
+func (c *TermiiClient) SendSMS(ctx context.Context, phone, otp, body string, expireAt int) (*TermiiSMSResponse, error) {
+    // Build message
+    message := body
+    if message == "" {
+        message = fmt.Sprintf("Your Fintech authentication code is %s. Valid for %d minutes, one-time use only", otp, expireAt)
+    }
+    
+    // Build request
+    reqBody := TermiiSMSRequest{
+        ApiKey:  c.apiKey,
+        To:      phone,
+        From:    "FintechApp",
+        Sms:     message,
+        Type:    "plain",
+        Channel: "dnd",
+        Media:   nil,
+    }
+    
+    jsonBody, err := json.Marshal(reqBody)
+    if err != nil {
+        return nil, fmt.Errorf("failed to marshal request: %w", err)
+    }
+    
+    url := c.baseURL + "/sms/send"
+    req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(jsonBody))
+    if err != nil {
+        return nil, fmt.Errorf("failed to create request: %w", err)
+    }
+    
+    req.Header.Set("Content-Type", "application/json")
+    
+    resp, err := c.httpClient.Do(req)
+    if err != nil {
+        return nil, fmt.Errorf("failed to send SMS: %w", err)
+    }
+    defer resp.Body.Close()
+    
+    var result TermiiSMSResponse
+    if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+        return nil, fmt.Errorf("failed to decode response: %w", err)
+    }
+    
+    if result.MessageId == "" {
+        return nil, fmt.Errorf("SMS sending failed: %s", result.Message)
+    }
+    
+    return &result, nil
+}
+
+// SendOTP - convenience method for sending OTP
+func (c *TermiiClient) SendOTP(ctx context.Context, phone, otp string, expireMinutes int) error {
+    _, err := c.SendSMS(ctx, phone, otp, "", expireMinutes)
+    return err
+}
+
+// SendCustomSMS - send custom message without OTP
+func (c *TermiiClient) SendCustomSMS(ctx context.Context, phone, message string) error {
+    reqBody := TermiiSMSRequest{
+        ApiKey:  c.apiKey,
+        To:      phone,
+        From:    "FintechApp",
+        Sms:     message,
+        Type:    "plain",
+        Channel: "dnd",
+        Media:   nil,
+    }
+    
+    jsonBody, err := json.Marshal(reqBody)
+    if err != nil {
+        return err
+    }
+    
+    url := c.baseURL + "/sms/send"
+    req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(jsonBody))
+    if err != nil {
+        return err
+    }
+    
+    req.Header.Set("Content-Type", "application/json")
+    
+    resp, err := c.httpClient.Do(req)
+    if err != nil {
+        return err
+    }
+    defer resp.Body.Close()
+    
+    var result TermiiSMSResponse
+    if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+        return err
+    }
+    
+    if result.MessageId == "" {
+        return fmt.Errorf("SMS sending failed: %s", result.Message)
+    }
+    
+    return nil
+}
+
+// ========== ASYNC SMS SERVICE ==========
+
+type SMSService struct {
+    termiiClient *TermiiClient
+    smsQueue     chan SMSPayload
+}
+
+type SMSPayload struct {
+    Phone         string
+    OTP           string
+    Body          string
+    ExpireMinutes int
+}
+
+func NewSMSService(termiiClient *TermiiClient) *SMSService {
+    service := &SMSService{
+        termiiClient: termiiClient,
+        smsQueue:     make(chan SMSPayload, 1000), // Buffered queue
+    }
+    
+    // Start workers
+    go service.processQueue()
+    
+    return service
+}
+
+// processQueue processes SMS messages asynchronously
+func (s *SMSService) processQueue() {
+    for payload := range s.smsQueue {
+        go func(p SMSPayload) {
+            ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+            defer cancel()
+            
+            message := p.Body
+            if message == "" {
+                message = fmt.Sprintf("Your Fintech authentication code is %s. Valid for %d minutes, one-time use only", p.OTP, p.ExpireMinutes)
+            }
+            
+            _, err := s.termiiClient.SendSMS(ctx, p.Phone, p.OTP, message, p.ExpireMinutes)
+            if err != nil {
+                // Log error - you can add proper logging here
+                fmt.Printf("Failed to send SMS to %s: %v\n", p.Phone, err)
+            }
+        }(payload)
+    }
+}
+
+// SendAsync sends SMS asynchronously
+func (s *SMSService) SendAsync(phone, otp, body string, expireMinutes int) {
+    s.smsQueue <- SMSPayload{
+        Phone:         phone,
+        OTP:           otp,
+        Body:          body,
+        ExpireMinutes: expireMinutes,
+    }
+}
+
+// SendSync sends SMS synchronously
+func (s *SMSService) SendSync(ctx context.Context, phone, otp, body string, expireMinutes int) error {
+    message := body
+    if message == "" {
+        message = fmt.Sprintf("Your Fintech authentication code is %s. Valid for %d minutes, one-time use only", otp, expireMinutes)
+    }
+    
+    _, err := s.termiiClient.SendSMS(ctx, phone, otp, message, expireMinutes)
+    return err
+}
+
+// Update ProviderRegistry to include SMS service
+func (r *ProviderRegistry) GetSMSService() *SMSService {
+    if smsService, ok := r.providers["sms"]; ok {
+        return smsService.(*SMSService)
+    }
+    return nil
+}
+
+
 // Provider Registry with RedBiller
 type ProviderRegistry struct {
     providers   map[string]interface{}
     redBiller   *RedBillerClient
 }
 
-func NewProviderRegistry(redBiller *RedBillerClient) *ProviderRegistry {
-    return &ProviderRegistry{
+// func NewProviderRegistry(redBiller *RedBillerClient, termiiAPIKey string) *ProviderRegistry {
+//     // return &ProviderRegistry{
+//     //     providers: make(map[string]interface{}),
+//     //     redBiller: redBiller,
+//     // }
+//     registry := &ProviderRegistry{
+//             providers: make(map[string]interface{}),
+//             redBiller: redBiller,
+//         }
+        
+//         // Initialize SMS service
+//         termiiClient := NewTermiiClient(termiiAPIKey)
+//         smsService := NewSMSService(termiiClient)
+//         registry.Register("sms", smsService)
+        
+//         return registry
+// }
+func NewProviderRegistry(redBiller *RedBillerClient, smsService *SMSService) *ProviderRegistry {
+    registry := &ProviderRegistry{
         providers: make(map[string]interface{}),
         redBiller: redBiller,
     }
+    
+    registry.Register("sms", smsService)
+    registry.Register("redbiller", redBiller)
+    
+    return registry
 }
 
 func (r *ProviderRegistry) GetRedBiller() *RedBillerClient {
